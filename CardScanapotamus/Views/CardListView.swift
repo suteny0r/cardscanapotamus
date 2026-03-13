@@ -25,7 +25,7 @@ struct CardListView: View {
                 }
             }
         }
-        .navigationTitle("CardScanapotamus")
+        .navigationTitle("CardScan-apotamus")
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 if !cards.isEmpty {

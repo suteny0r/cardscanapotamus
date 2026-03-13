@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>CardScanapotamus</string>
+	<string>CardScan-apotamus</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -23,11 +23,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>CardScanapotamus needs camera access to scan business cards.</string>
+	<string>CardScan-apotamus needs camera access to scan business cards.</string>
 	<key>NSContactsUsageDescription</key>
-	<string>CardScanapotamus needs access to your contacts to save scanned business card information.</string>
+	<string>CardScan-apotamus needs access to your contacts to save scanned business card information.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>CardScanapotamus needs photo library access to import business card images.</string>
+	<string>CardScan-apotamus needs photo library access to import business card images.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
