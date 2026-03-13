@@ -5,9 +5,12 @@ struct CardDetailView: View {
     var isNewScan: Bool = false
     var onSave: (() -> Void)?
 
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @State private var isSavingToContacts = false
     @State private var contactsSaved = false
     @State private var alertMessage: String?
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         List {
@@ -66,10 +69,31 @@ struct CardDetailView: View {
                         .frame(maxWidth: .infinity)
                     }
                 }
+
+                if !isNewScan {
+                    Button(role: .destructive) {
+                        showDeleteConfirm = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "trash")
+                            Text("Delete Card")
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
             }
         }
         .navigationTitle(card.fullName.isEmpty ? "Scanned Card" : card.fullName)
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog("Delete Card", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                modelContext.delete(card)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete this scanned card.")
+        }
         .alert("Contacts", isPresented: .init(
             get: { alertMessage != nil },
             set: { if !$0 { alertMessage = nil } }

@@ -6,6 +6,7 @@ struct CardListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var exportItem: ExportItem?
     @State private var exportError: String?
+    @State private var showDeleteAllConfirm = false
 
     var body: some View {
         Group {
@@ -28,13 +29,30 @@ struct CardListView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 if !cards.isEmpty {
-                    Button {
-                        exportToExcel()
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
+                    HStack {
+                        Button {
+                            exportToExcel()
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        Button(role: .destructive) {
+                            showDeleteAllConfirm = true
+                        } label: {
+                            Image(systemName: "trash")
+                        }
                     }
                 }
             }
+        }
+        .confirmationDialog("Delete All Cards", isPresented: $showDeleteAllConfirm, titleVisibility: .visible) {
+            Button("Delete All", role: .destructive) {
+                for card in cards {
+                    modelContext.delete(card)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete all \(cards.count) scanned cards.")
         }
         .sheet(item: $exportItem) { item in
             ShareSheet(items: [item.url])
