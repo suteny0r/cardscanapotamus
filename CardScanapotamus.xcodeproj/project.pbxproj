@@ -1,0 +1,379 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		287B961FC92BC76CDC12FC1D /* CameraScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A201D7F7FE8B84B4B14F86 /* CameraScannerView.swift */; };
+		46681379B0A853DFE7622CAA /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC368058F8AD14CA67A6D08 /* OCRService.swift */; };
+		4BA1C9489851F4992809C11A /* CardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D28AC8E8FC063A81264A8A1 /* CardListView.swift */; };
+		66AF4F44A61C09071AA2C562 /* CardScanapotamusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4534261C9E40D781CF91E37 /* CardScanapotamusApp.swift */; };
+		786C9984CB74EC82D58D6C68 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4E7DBE280A8CD48174CDCE9 /* Assets.xcassets */; };
+		83573DAF92A37084AC6896E3 /* ScannedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC42B54CCE5F90E3A1E1B13 /* ScannedCard.swift */; };
+		95CB9F38B990C58875215ACA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76D4F6C1BDB2B76D1FD2080F /* ContentView.swift */; };
+		A7D863035B5F387B544A2C9E /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29094DA3D62C2CAE307C1A30 /* CardDetailView.swift */; };
+		E4B2B531EB08914E47EBBC3E /* ContactParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A6BC1FFFE37328370C9F46A /* ContactParser.swift */; };
+		F8ACC7C321CA520BD4D54C47 /* ContactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2170DC5142F7ED6CC3C2BF /* ContactsService.swift */; };
+		FBD85CF4F988F2B5F2A0B0BE /* ExcelExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 054F8F088047360D30AD8960 /* ExcelExporter.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		054F8F088047360D30AD8960 /* ExcelExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExcelExporter.swift; sourceTree = "<group>"; };
+		0DC368058F8AD14CA67A6D08 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
+		12979248759C6568519353B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		29094DA3D62C2CAE307C1A30 /* CardDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDetailView.swift; sourceTree = "<group>"; };
+		2A2170DC5142F7ED6CC3C2BF /* ContactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsService.swift; sourceTree = "<group>"; };
+		5D28AC8E8FC063A81264A8A1 /* CardListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardListView.swift; sourceTree = "<group>"; };
+		6A6BC1FFFE37328370C9F46A /* ContactParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactParser.swift; sourceTree = "<group>"; };
+		76D4F6C1BDB2B76D1FD2080F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		79A201D7F7FE8B84B4B14F86 /* CameraScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraScannerView.swift; sourceTree = "<group>"; };
+		7DC42B54CCE5F90E3A1E1B13 /* ScannedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannedCard.swift; sourceTree = "<group>"; };
+		973F39DF2C1A17F9F114FC10 /* CardScanapotamus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CardScanapotamus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4534261C9E40D781CF91E37 /* CardScanapotamusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardScanapotamusApp.swift; sourceTree = "<group>"; };
+		F4E7DBE280A8CD48174CDCE9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		A9DB2968EB503C54D79593DD /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F4534261C9E40D781CF91E37 /* CardScanapotamusApp.swift */,
+				76D4F6C1BDB2B76D1FD2080F /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		D3225B3033EFD7AC1E488088 = {
+			isa = PBXGroup;
+			children = (
+				DAD45A4BD340469C6ED35A74 /* CardScanapotamus */,
+				E3B49DF8FAC0841DDBA3363D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DAD45A4BD340469C6ED35A74 /* CardScanapotamus */ = {
+			isa = PBXGroup;
+			children = (
+				F4E7DBE280A8CD48174CDCE9 /* Assets.xcassets */,
+				12979248759C6568519353B4 /* Info.plist */,
+				A9DB2968EB503C54D79593DD /* App */,
+				FC4259363347DDA191CAAFA7 /* Models */,
+				E12CAF71459B4BB1720A6912 /* Services */,
+				E35C193D2216F9C8A78311EC /* Views */,
+			);
+			path = CardScanapotamus;
+			sourceTree = "<group>";
+		};
+		E12CAF71459B4BB1720A6912 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				6A6BC1FFFE37328370C9F46A /* ContactParser.swift */,
+				2A2170DC5142F7ED6CC3C2BF /* ContactsService.swift */,
+				054F8F088047360D30AD8960 /* ExcelExporter.swift */,
+				0DC368058F8AD14CA67A6D08 /* OCRService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E35C193D2216F9C8A78311EC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				79A201D7F7FE8B84B4B14F86 /* CameraScannerView.swift */,
+				29094DA3D62C2CAE307C1A30 /* CardDetailView.swift */,
+				5D28AC8E8FC063A81264A8A1 /* CardListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E3B49DF8FAC0841DDBA3363D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				973F39DF2C1A17F9F114FC10 /* CardScanapotamus.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FC4259363347DDA191CAAFA7 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				7DC42B54CCE5F90E3A1E1B13 /* ScannedCard.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		94262022F39D84B63093F4F5 /* CardScanapotamus */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7242A3235549B143D4B7CB30 /* Build configuration list for PBXNativeTarget "CardScanapotamus" */;
+			buildPhases = (
+				28AC8C732105621A7A1F1A7E /* Sources */,
+				F4DA9F6B02A6DBBF74450D19 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CardScanapotamus;
+			packageProductDependencies = (
+			);
+			productName = CardScanapotamus;
+			productReference = 973F39DF2C1A17F9F114FC10 /* CardScanapotamus.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1852B0840E24150B069FD8C6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					94262022F39D84B63093F4F5 = {
+						DevelopmentTeam = NP58A25HR5;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 59363DAA2B1B40D9F5035A54 /* Build configuration list for PBXProject "CardScanapotamus" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D3225B3033EFD7AC1E488088;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = E3B49DF8FAC0841DDBA3363D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				94262022F39D84B63093F4F5 /* CardScanapotamus */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F4DA9F6B02A6DBBF74450D19 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				786C9984CB74EC82D58D6C68 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		28AC8C732105621A7A1F1A7E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				287B961FC92BC76CDC12FC1D /* CameraScannerView.swift in Sources */,
+				A7D863035B5F387B544A2C9E /* CardDetailView.swift in Sources */,
+				4BA1C9489851F4992809C11A /* CardListView.swift in Sources */,
+				66AF4F44A61C09071AA2C562 /* CardScanapotamusApp.swift in Sources */,
+				E4B2B531EB08914E47EBBC3E /* ContactParser.swift in Sources */,
+				F8ACC7C321CA520BD4D54C47 /* ContactsService.swift in Sources */,
+				95CB9F38B990C58875215ACA /* ContentView.swift in Sources */,
+				FBD85CF4F988F2B5F2A0B0BE /* ExcelExporter.swift in Sources */,
+				46681379B0A853DFE7622CAA /* OCRService.swift in Sources */,
+				83573DAF92A37084AC6896E3 /* ScannedCard.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9A66D9DC368214226CA23A9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		BE9BCFD639C7FC811340B277 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NP58A25HR5;
+				INFOPLIST_FILE = CardScanapotamus/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stevebliss.CardScanapotamus;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		CADF6855DA17D0586D406D65 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NP58A25HR5;
+				INFOPLIST_FILE = CardScanapotamus/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stevebliss.CardScanapotamus;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D725E185093C0EDF2484C049 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		59363DAA2B1B40D9F5035A54 /* Build configuration list for PBXProject "CardScanapotamus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A66D9DC368214226CA23A9A /* Debug */,
+				D725E185093C0EDF2484C049 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7242A3235549B143D4B7CB30 /* Build configuration list for PBXNativeTarget "CardScanapotamus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CADF6855DA17D0586D406D65 /* Debug */,
+				BE9BCFD639C7FC811340B277 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1852B0840E24150B069FD8C6 /* Project object */;
+}
