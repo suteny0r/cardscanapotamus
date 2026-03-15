@@ -2,6 +2,8 @@ import SwiftUI
 import AVFoundation
 
 struct CameraScannerView: View {
+    var defaultSource: String = ""
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var capturedImage: UIImage?
@@ -9,7 +11,6 @@ struct CameraScannerView: View {
     @State private var scannedCard: ScannedCard?
     @State private var errorMessage: String?
     @State private var showImagePicker = false
-    @State private var imageSource: UIImagePickerController.SourceType = .camera
 
     var body: some View {
         NavigationStack {
@@ -17,6 +18,7 @@ struct CameraScannerView: View {
                 if let card = scannedCard {
                     CardDetailView(card: card, isNewScan: true) {
                         modelContext.insert(card)
+                        try? modelContext.save()
                         dismiss()
                     }
                 } else if isProcessing {
@@ -36,7 +38,7 @@ struct CameraScannerView: View {
                 }
             }
             .sheet(isPresented: $showImagePicker) {
-                ImagePicker(sourceType: imageSource) { image in
+                ImagePicker(sourceType: .camera) { image in
                     if let image {
                         processImage(image)
                     }
@@ -64,34 +66,19 @@ struct CameraScannerView: View {
             Text("Scan a Business Card")
                 .font(.title2.bold())
 
-            Text("Take a photo or choose from your library")
+            Text("Take a photo of a business card")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            VStack(spacing: 12) {
-                Button {
-                    imageSource = .camera
-                    showImagePicker = true
-                } label: {
-                    Label("Take Photo", systemImage: "camera.fill")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.blue)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-
-                Button {
-                    imageSource = .photoLibrary
-                    showImagePicker = true
-                } label: {
-                    Label("Choose from Library", systemImage: "photo.on.rectangle")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.blue.opacity(0.1))
-                        .foregroundStyle(.blue)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
+            Button {
+                showImagePicker = true
+            } label: {
+                Label("Take Photo", systemImage: "camera.fill")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.blue)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .padding(.horizontal, 32)
 
@@ -108,6 +95,7 @@ struct CameraScannerView: View {
                 let lines = try await OCRService.recognizeText(in: image)
                 var card = ContactParser.parse(lines: lines)
                 card.imageData = image.jpegData(compressionQuality: 0.7)
+                card.source = defaultSource.isEmpty ? nil : defaultSource
                 scannedCard = card
             } catch {
                 errorMessage = error.localizedDescription

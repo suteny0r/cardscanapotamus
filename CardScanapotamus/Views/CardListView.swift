@@ -4,14 +4,15 @@ import SwiftData
 struct CardListView: View {
     @Query(sort: \ScannedCard.scannedAt, order: .reverse) private var cards: [ScannedCard]
     @Environment(\.modelContext) private var modelContext
-    @State private var exportItem: ExportItem?
-    @State private var exportError: String?
-    @State private var showDeleteAllConfirm = false
 
     var body: some View {
         Group {
             if cards.isEmpty {
-                emptyStateView
+                ContentUnavailableView {
+                    Label("No Cards Scanned", systemImage: "creditcard")
+                } description: {
+                    Text("Tap the camera button to scan your first business card.")
+                }
             } else {
                 List {
                     ForEach(cards) { card in
@@ -24,63 +25,6 @@ struct CardListView: View {
                     .onDelete(perform: deleteCards)
                 }
             }
-        }
-        .navigationTitle("CardScan-apotamus")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if !cards.isEmpty {
-                    HStack {
-                        Button {
-                            exportToExcel()
-                        } label: {
-                            Image(systemName: "square.and.arrow.up")
-                        }
-                        Button(role: .destructive) {
-                            showDeleteAllConfirm = true
-                        } label: {
-                            Image(systemName: "trash")
-                        }
-                    }
-                }
-            }
-        }
-        .confirmationDialog("Delete All Cards", isPresented: $showDeleteAllConfirm, titleVisibility: .visible) {
-            Button("Delete All", role: .destructive) {
-                for card in cards {
-                    modelContext.delete(card)
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This will permanently delete all \(cards.count) scanned cards.")
-        }
-        .sheet(item: $exportItem) { item in
-            ShareSheet(items: [item.url])
-        }
-        .alert("Export Error", isPresented: .init(
-            get: { exportError != nil },
-            set: { if !$0 { exportError = nil } }
-        )) {
-            Button("OK") { exportError = nil }
-        } message: {
-            Text(exportError ?? "")
-        }
-    }
-
-    private func exportToExcel() {
-        do {
-            let url = try ExcelExporter.generateXLSX(from: cards)
-            exportItem = ExportItem(url: url)
-        } catch {
-            exportError = error.localizedDescription
-        }
-    }
-
-    private var emptyStateView: some View {
-        ContentUnavailableView {
-            Label("No Cards Scanned", systemImage: "creditcard")
-        } description: {
-            Text("Tap the camera button to scan your first business card.")
         }
     }
 
@@ -115,6 +59,15 @@ struct CardListView: View {
                     Text(card.jobTitle)
                         .font(.caption)
                         .foregroundStyle(.tertiary)
+                }
+                if let source = card.source, !source.isEmpty {
+                    Text(source)
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(.blue.opacity(0.7))
+                        .clipShape(Capsule())
                 }
             }
         }

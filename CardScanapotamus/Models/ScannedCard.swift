@@ -13,6 +13,8 @@ final class ScannedCard {
     var rawText: String
     var imageData: Data?
     var scannedAt: Date
+    var source: String?
+    var notes: String?
 
     init(
         fullName: String = "",
@@ -24,7 +26,9 @@ final class ScannedCard {
         address: String = "",
         rawText: String = "",
         imageData: Data? = nil,
-        scannedAt: Date = .now
+        scannedAt: Date = .now,
+        source: String? = nil,
+        notes: String? = nil
     ) {
         self.fullName = fullName
         self.jobTitle = jobTitle
@@ -36,5 +40,7 @@ final class ScannedCard {
         self.rawText = rawText
         self.imageData = imageData
         self.scannedAt = scannedAt
+        self.source = source
+        self.notes = notes
     }
 }

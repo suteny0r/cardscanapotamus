@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct CardDetailView: View {
     @Bindable var card: ScannedCard
@@ -7,10 +8,12 @@ struct CardDetailView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \SourceOption.createdAt) private var sourceOptions: [SourceOption]
     @State private var isSavingToContacts = false
     @State private var contactsSaved = false
     @State private var alertMessage: String?
     @State private var showDeleteConfirm = false
+    @State private var showSettingsAlert = false
 
     var body: some View {
         List {
@@ -36,6 +39,42 @@ struct CardDetailView: View {
                 EditableRow(label: "Phone", text: $card.phone, icon: "phone.fill")
                 EditableRow(label: "Website", text: $card.website, icon: "globe")
                 EditableRow(label: "Address", text: $card.address, icon: "mappin.circle.fill")
+            }
+
+            Section("Source & Notes") {
+                HStack {
+                    Image(systemName: "tag.fill")
+                        .foregroundStyle(.blue)
+                        .frame(width: 24)
+                    if sourceOptions.isEmpty {
+                        TextField("Source", text: Binding(
+                            get: { card.source ?? "" },
+                            set: { card.source = $0.isEmpty ? nil : $0 }
+                        ))
+                    } else {
+                        Picker("Source", selection: Binding(
+                            get: { card.source ?? "" },
+                            set: { card.source = $0.isEmpty ? nil : $0 }
+                        )) {
+                            Text("None").tag("")
+                            ForEach(sourceOptions) { option in
+                                Text(option.name).tag(option.name)
+                            }
+                        }
+                        .labelsHidden()
+                    }
+                }
+                HStack(alignment: .top) {
+                    Image(systemName: "note.text")
+                        .foregroundStyle(.blue)
+                        .frame(width: 24)
+                        .padding(.top, 8)
+                    TextField("Notes", text: Binding(
+                        get: { card.notes ?? "" },
+                        set: { card.notes = $0.isEmpty ? nil : $0 }
+                    ), axis: .vertical)
+                        .lineLimit(3...6)
+                }
             }
 
             if !card.rawText.isEmpty {
@@ -102,6 +141,16 @@ struct CardDetailView: View {
         } message: {
             Text(alertMessage ?? "")
         }
+        .alert("Contacts Access Denied", isPresented: $showSettingsAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Contact access is denied. Please enable it in Settings to save cards to your contacts.")
+        }
     }
 
     private func saveToContacts() {
@@ -110,6 +159,8 @@ struct CardDetailView: View {
             do {
                 try await ContactsService.saveToContacts(card)
                 contactsSaved = true
+            } catch is ContactsError {
+                showSettingsAlert = true
             } catch {
                 alertMessage = error.localizedDescription
             }

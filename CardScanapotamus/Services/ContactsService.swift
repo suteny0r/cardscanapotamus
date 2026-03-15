@@ -5,6 +5,11 @@ struct ContactsService {
     static func saveToContacts(_ card: ScannedCard) async throws {
         let store = CNContactStore()
 
+        let status = CNContactStore.authorizationStatus(for: .contacts)
+        if status == .denied || status == .restricted {
+            throw ContactsError.accessDenied
+        }
+
         let granted = try await store.requestAccess(for: .contacts)
         guard granted else {
             throw ContactsError.accessDenied

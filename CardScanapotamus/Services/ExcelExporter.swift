@@ -8,7 +8,7 @@ struct ExcelExporter {
         try? FileManager.default.removeItem(at: xlsxURL)
 
         // Build shared strings
-        let headers = ["Name", "Title", "Company", "Email", "Phone", "Website", "Address", "Date Scanned"]
+        let headers = ["Name", "Title", "Company", "Email", "Phone", "Website", "Address", "Source", "Notes", "Date Scanned"]
         var sharedStrings: [String] = []
         var stringIndex: [String: Int] = [:]
 
@@ -36,6 +36,8 @@ struct ExcelExporter {
                 addString(card.phone),
                 addString(card.website),
                 addString(card.address),
+                addString(card.source ?? ""),
+                addString(card.notes ?? ""),
                 addString(dateFormatter.string(from: card.scannedAt))
             ])
         }
@@ -59,9 +61,9 @@ struct ExcelExporter {
         ssXML += "</sst>"
 
         // Sheet XML
-        let colLetters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+        let colLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
         var sheetXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><cols>"
-        let widths = [20, 25, 25, 30, 18, 25, 35, 20]
+        let widths = [20, 25, 25, 30, 18, 25, 35, 20, 30, 20]
         for (i, w) in widths.enumerated() {
             sheetXML += "<col min=\"\(i+1)\" max=\"\(i+1)\" width=\"\(w)\" customWidth=\"1\"/>"
         }
