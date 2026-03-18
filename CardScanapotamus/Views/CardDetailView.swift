@@ -62,6 +62,8 @@ struct CardDetailView: View {
                             }
                         }
                         .labelsHidden()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(1)
                     }
                 }
                 HStack(alignment: .top) {

@@ -121,6 +121,7 @@ struct ContentView: View {
                     }
                 }
                 .labelsHidden()
+                .fixedSize()
             }
 
             Spacer()
