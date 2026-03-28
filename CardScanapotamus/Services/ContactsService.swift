@@ -35,10 +35,18 @@ struct ContactsService {
             ]
         }
 
+        var phoneNumbers: [CNLabeledValue<CNPhoneNumber>] = []
         if !card.phone.isEmpty {
-            contact.phoneNumbers = [
-                CNLabeledValue(label: CNLabelPhoneNumberMain, value: CNPhoneNumber(stringValue: card.phone))
-            ]
+            phoneNumbers.append(CNLabeledValue(label: cnLabel(for: card.phoneType ?? "Phone"), value: CNPhoneNumber(stringValue: card.phone)))
+        }
+        if let phone2 = card.phone2, !phone2.isEmpty {
+            phoneNumbers.append(CNLabeledValue(label: cnLabel(for: card.phone2Type ?? "Cell"), value: CNPhoneNumber(stringValue: phone2)))
+        }
+        if let phone3 = card.phone3, !phone3.isEmpty {
+            phoneNumbers.append(CNLabeledValue(label: cnLabel(for: card.phone3Type ?? "Fax"), value: CNPhoneNumber(stringValue: phone3)))
+        }
+        if !phoneNumbers.isEmpty {
+            contact.phoneNumbers = phoneNumbers
         }
 
         if !card.website.isEmpty {
@@ -62,6 +70,14 @@ struct ContactsService {
         let saveRequest = CNSaveRequest()
         saveRequest.add(contact, toContainerWithIdentifier: nil)
         try store.execute(saveRequest)
+    }
+
+    private static func cnLabel(for type: String) -> String {
+        switch type {
+        case "Cell": return CNLabelPhoneNumberMobile
+        case "Fax": return CNLabelPhoneNumberWorkFax
+        default: return CNLabelPhoneNumberMain
+        }
     }
 }
 

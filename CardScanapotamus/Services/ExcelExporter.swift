@@ -8,7 +8,7 @@ struct ExcelExporter {
         try? FileManager.default.removeItem(at: xlsxURL)
 
         // Build shared strings
-        let headers = ["Name", "Title", "Company", "Email", "Phone", "Website", "Address", "Source", "Notes", "Date Scanned"]
+        let headers = ["Name", "Title", "Company", "Email", "Phone", "Cell", "Fax", "Website", "Address", "Source", "Notes", "Raw Text", "Date Scanned"]
         var sharedStrings: [String] = []
         var stringIndex: [String: Int] = [:]
 
@@ -28,16 +28,38 @@ struct ExcelExporter {
 
         var rows: [[Int]] = []
         for card in cards {
+            // Map each phone field to its column by type
+            let phones: [(String, String)] = [
+                (card.phone, card.phoneType ?? "Phone"),
+                (card.phone2 ?? "", card.phone2Type ?? "Cell"),
+                (card.phone3 ?? "", card.phone3Type ?? "Fax")
+            ]
+            var phone = ""
+            var cell = ""
+            var fax = ""
+            for (number, type) in phones {
+                guard !number.isEmpty else { continue }
+                switch type {
+                case "Phone": phone = number
+                case "Cell": cell = number
+                case "Fax": fax = number
+                default: break
+                }
+            }
+
             rows.append([
                 addString(card.fullName),
                 addString(card.jobTitle),
                 addString(card.company),
                 addString(card.email),
-                addString(card.phone),
+                addString(phone),
+                addString(cell),
+                addString(fax),
                 addString(card.website),
                 addString(card.address),
                 addString(card.source ?? ""),
                 addString(card.notes ?? ""),
+                addString(card.rawText),
                 addString(dateFormatter.string(from: card.scannedAt))
             ])
         }
@@ -61,9 +83,9 @@ struct ExcelExporter {
         ssXML += "</sst>"
 
         // Sheet XML
-        let colLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+        let colLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]
         var sheetXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><cols>"
-        let widths = [20, 25, 25, 30, 18, 25, 35, 20, 30, 20]
+        let widths = [20, 25, 25, 30, 18, 18, 18, 25, 35, 20, 30, 40, 20]
         for (i, w) in widths.enumerated() {
             sheetXML += "<col min=\"\(i+1)\" max=\"\(i+1)\" width=\"\(w)\" customWidth=\"1\"/>"
         }

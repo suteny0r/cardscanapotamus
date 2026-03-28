@@ -14,6 +14,12 @@ struct CardDetailView: View {
     @State private var alertMessage: String?
     @State private var showDeleteConfirm = false
     @State private var showSettingsAlert = false
+    @State private var showDuplicateTypeAlert = false
+
+    // Local copies of phone types to prevent invalid state from being written
+    @State private var phoneType1: String = "Phone"
+    @State private var phoneType2: String = "Cell"
+    @State private var phoneType3: String = "Fax"
 
     var body: some View {
         List {
@@ -36,9 +42,25 @@ struct CardDetailView: View {
 
             Section("Contact Details") {
                 EditableRow(label: "Email", text: $card.email, icon: "envelope.fill")
-                EditableRow(label: "Phone", text: $card.phone, icon: "phone.fill")
+                PhoneRow(label: "Phone", number: $card.phone, type: $phoneType1)
+                PhoneRow(label: "Phone 2", number: Binding(
+                    get: { card.phone2 ?? "" },
+                    set: { card.phone2 = $0.isEmpty ? nil : $0 }
+                ), type: $phoneType2)
+                PhoneRow(label: "Phone 3", number: Binding(
+                    get: { card.phone3 ?? "" },
+                    set: { card.phone3 = $0.isEmpty ? nil : $0 }
+                ), type: $phoneType3)
                 EditableRow(label: "Website", text: $card.website, icon: "globe")
                 EditableRow(label: "Address", text: $card.address, icon: "mappin.circle.fill")
+            }
+
+            if hasDuplicatePhoneTypes {
+                Section {
+                    Label(duplicatePhoneTypeMessage, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.red)
+                        .font(.caption)
+                }
             }
 
             Section("Source & Notes") {
@@ -84,6 +106,7 @@ struct CardDetailView: View {
                     Text(card.rawText)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
                 }
             }
 
@@ -97,7 +120,7 @@ struct CardDetailView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .disabled(isSavingToContacts || contactsSaved)
+                .disabled(isSavingToContacts || contactsSaved || hasDuplicatePhoneTypes)
 
                 if isNewScan {
                     Button {
@@ -109,6 +132,7 @@ struct CardDetailView: View {
                         }
                         .frame(maxWidth: .infinity)
                     }
+                    .disabled(hasDuplicatePhoneTypes)
                 }
 
                 if !isNewScan {
@@ -126,6 +150,24 @@ struct CardDetailView: View {
         }
         .navigationTitle(card.fullName.isEmpty ? "Scanned Card" : card.fullName)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(hasDuplicatePhoneTypes)
+        .toolbar {
+            if hasDuplicatePhoneTypes {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Back") {
+                        showDuplicateTypeAlert = true
+                    }
+                }
+            }
+        }
+        .onAppear {
+            phoneType1 = card.phoneType ?? "Phone"
+            phoneType2 = card.phone2Type ?? "Cell"
+            phoneType3 = card.phone3Type ?? "Fax"
+        }
+        .onChange(of: phoneType1) { syncPhoneTypes() }
+        .onChange(of: phoneType2) { syncPhoneTypes() }
+        .onChange(of: phoneType3) { syncPhoneTypes() }
         .confirmationDialog("Delete Card", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
                 modelContext.delete(card)
@@ -134,6 +176,18 @@ struct CardDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will permanently delete this scanned card.")
+        }
+        .alert("Duplicate Phone Types", isPresented: $showDuplicateTypeAlert) {
+            Button("Discard Changes", role: .destructive) {
+                // Revert local types back to saved values and go back
+                phoneType1 = card.phoneType ?? "Phone"
+                phoneType2 = card.phone2Type ?? "Cell"
+                phoneType3 = card.phone3Type ?? "Fax"
+                dismiss()
+            }
+            Button("Fix Now", role: .cancel) {}
+        } message: {
+            Text("Phone type selections have duplicates. Going back will discard your unsaved type changes. Stay to fix them.")
         }
         .alert("Contacts", isPresented: .init(
             get: { alertMessage != nil },
@@ -153,6 +207,29 @@ struct CardDetailView: View {
         } message: {
             Text("Contact access is denied. Please enable it in Settings to save cards to your contacts.")
         }
+    }
+
+    private var hasDuplicatePhoneTypes: Bool {
+        let types = [phoneType1, phoneType2, phoneType3]
+        return Set(types).count < types.count
+    }
+
+    private var duplicatePhoneTypeMessage: String {
+        let types = [phoneType1, phoneType2, phoneType3]
+        var seen = Set<String>()
+        var dupes = Set<String>()
+        for t in types {
+            if !seen.insert(t).inserted { dupes.insert(t) }
+        }
+        let names = dupes.sorted().joined(separator: ", ")
+        return "Each phone field must have a unique type. \"\(names)\" is assigned to more than one field."
+    }
+
+    private func syncPhoneTypes() {
+        guard !hasDuplicatePhoneTypes else { return }
+        card.phoneType = phoneType1
+        card.phone2Type = phoneType2
+        card.phone3Type = phoneType3
     }
 
     private func saveToContacts() {
@@ -182,6 +259,30 @@ struct EditableRow: View {
                 .foregroundStyle(.blue)
                 .frame(width: 24)
             TextField(label, text: $text)
+        }
+    }
+}
+
+struct PhoneRow: View {
+    let label: String
+    @Binding var number: String
+    @Binding var type: String
+
+    private let phoneTypes = ["Phone", "Cell", "Fax"]
+
+    var body: some View {
+        HStack {
+            Image(systemName: "phone.fill")
+                .foregroundStyle(.blue)
+                .frame(width: 24)
+            TextField(label, text: $number)
+            Picker("", selection: $type) {
+                ForEach(phoneTypes, id: \.self) { t in
+                    Text(t).tag(t)
+                }
+            }
+            .pickerStyle(.menu)
+            .fixedSize()
         }
     }
 }
