@@ -13,6 +13,11 @@ final class ScannedCard {
     var rawText: String
     var imageData: Data?
     var scannedAt: Date
+    var addressLine1: String?
+    var addressLine2: String?
+    var city: String?
+    var state: String?
+    var zip: String?
     var phone2: String?
     var phone3: String?
     var phoneType: String?
@@ -32,6 +37,11 @@ final class ScannedCard {
         rawText: String = "",
         imageData: Data? = nil,
         scannedAt: Date = .now,
+        addressLine1: String? = nil,
+        addressLine2: String? = nil,
+        city: String? = nil,
+        state: String? = nil,
+        zip: String? = nil,
         phone2: String? = nil,
         phone3: String? = nil,
         phoneType: String? = nil,
@@ -50,6 +60,11 @@ final class ScannedCard {
         self.rawText = rawText
         self.imageData = imageData
         self.scannedAt = scannedAt
+        self.addressLine1 = addressLine1
+        self.addressLine2 = addressLine2
+        self.city = city
+        self.state = state
+        self.zip = zip
         self.phone2 = phone2
         self.phone3 = phone3
         self.phoneType = phoneType

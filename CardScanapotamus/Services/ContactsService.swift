@@ -1,20 +1,9 @@
 import Contacts
 import ContactsUI
+import SwiftUI
 
 struct ContactsService {
-    static func saveToContacts(_ card: ScannedCard) async throws {
-        let store = CNContactStore()
-
-        let status = CNContactStore.authorizationStatus(for: .contacts)
-        if status == .denied || status == .restricted {
-            throw ContactsError.accessDenied
-        }
-
-        let granted = try await store.requestAccess(for: .contacts)
-        guard granted else {
-            throw ContactsError.accessDenied
-        }
-
+    static func buildContact(from card: ScannedCard) -> CNMutableContact {
         let contact = CNMutableContact()
 
         // Parse name
@@ -55,9 +44,18 @@ struct ContactsService {
             ]
         }
 
-        if !card.address.isEmpty {
+        let hasAddress = [card.addressLine1, card.addressLine2, card.city, card.state, card.zip]
+            .contains { ($0 ?? "").isEmpty == false }
+        if hasAddress {
             let postalAddress = CNMutablePostalAddress()
-            postalAddress.street = card.address
+            var street = card.addressLine1 ?? ""
+            if let line2 = card.addressLine2, !line2.isEmpty {
+                street += street.isEmpty ? line2 : "\n\(line2)"
+            }
+            postalAddress.street = street
+            postalAddress.city = card.city ?? ""
+            postalAddress.state = card.state ?? ""
+            postalAddress.postalCode = card.zip ?? ""
             contact.postalAddresses = [
                 CNLabeledValue(label: CNLabelWork, value: postalAddress)
             ]
@@ -67,9 +65,7 @@ struct ContactsService {
             contact.imageData = imageData
         }
 
-        let saveRequest = CNSaveRequest()
-        saveRequest.add(contact, toContainerWithIdentifier: nil)
-        try store.execute(saveRequest)
+        return contact
     }
 
     private static func cnLabel(for type: String) -> String {
@@ -81,13 +77,32 @@ struct ContactsService {
     }
 }
 
-enum ContactsError: LocalizedError {
-    case accessDenied
+// UIKit wrapper to present CNContactViewController
+struct ContactSaveView: UIViewControllerRepresentable {
+    let contact: CNMutableContact
+    var onComplete: () -> Void
 
-    var errorDescription: String? {
-        switch self {
-        case .accessDenied:
-            return "Access to contacts was denied. Please enable it in Settings."
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let vc = CNContactViewController(forNewContact: contact)
+        vc.delegate = context.coordinator
+        return UINavigationController(rootViewController: vc)
+    }
+
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onComplete: onComplete)
+    }
+
+    class Coordinator: NSObject, CNContactViewControllerDelegate {
+        let onComplete: () -> Void
+
+        init(onComplete: @escaping () -> Void) {
+            self.onComplete = onComplete
+        }
+
+        func contactViewController(_ viewController: CNContactViewController, didCompleteWith contact: CNContact?) {
+            onComplete()
         }
     }
 }

@@ -66,6 +66,31 @@ struct ContactParser {
             }
         }
 
+        // Parse address parts into structured fields
+        // Typically: line1 = street, line2 = suite/unit, last line = city, state zip
+        if !addressParts.isEmpty {
+            let lastLine = addressParts.last!
+            // Try to parse "City, ST 12345" or "City, ST" from last line
+            if let cityStateZip = parseCityStateZip(lastLine) {
+                card.city = cityStateZip.city
+                card.state = cityStateZip.state
+                card.zip = cityStateZip.zip
+                let remaining = addressParts.dropLast()
+                if remaining.count >= 2 {
+                    card.addressLine1 = remaining.first
+                    card.addressLine2 = remaining.dropFirst().joined(separator: ", ")
+                } else if remaining.count == 1 {
+                    card.addressLine1 = remaining.first
+                }
+            } else {
+                // No city/state/zip detected — put everything in line1/line2
+                card.addressLine1 = addressParts.first
+                if addressParts.count > 1 {
+                    card.addressLine2 = addressParts.dropFirst().joined(separator: ", ")
+                }
+            }
+        }
+        // Also store composite for backward compat
         card.address = addressParts.joined(separator: ", ")
         return card
     }
@@ -139,6 +164,37 @@ struct ContactParser {
         ]
         let lower = text.lowercased()
         return titleKeywords.contains { lower.contains($0) }
+    }
+
+    private static func parseCityStateZip(_ text: String) -> (city: String, state: String, zip: String)? {
+        // Match patterns like "Miami, FL 33179" or "Miami, FL" or "Miami FL 33179"
+        let pattern = #"^(.+?),?\s+([A-Z]{2})\s+(\d{5}(?:-\d{4})?)$"#
+        if let regex = try? NSRegularExpression(pattern: pattern),
+           let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+           match.numberOfRanges >= 4,
+           let cityRange = Range(match.range(at: 1), in: text),
+           let stateRange = Range(match.range(at: 2), in: text),
+           let zipRange = Range(match.range(at: 3), in: text) {
+            return (
+                city: String(text[cityRange]).trimmingCharacters(in: .punctuationCharacters),
+                state: String(text[stateRange]),
+                zip: String(text[zipRange])
+            )
+        }
+        // Match "City, ST" without zip
+        let pattern2 = #"^(.+?),?\s+([A-Z]{2})$"#
+        if let regex = try? NSRegularExpression(pattern: pattern2),
+           let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+           match.numberOfRanges >= 3,
+           let cityRange = Range(match.range(at: 1), in: text),
+           let stateRange = Range(match.range(at: 2), in: text) {
+            return (
+                city: String(text[cityRange]).trimmingCharacters(in: .punctuationCharacters),
+                state: String(text[stateRange]),
+                zip: ""
+            )
+        }
+        return nil
     }
 
     private static func looksLikeAddressContinuation(_ text: String) -> Bool {

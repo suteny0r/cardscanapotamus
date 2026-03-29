@@ -9,11 +9,9 @@ struct CardDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \SourceOption.createdAt) private var sourceOptions: [SourceOption]
-    @State private var isSavingToContacts = false
     @State private var contactsSaved = false
-    @State private var alertMessage: String?
+    @State private var showContactSave = false
     @State private var showDeleteConfirm = false
-    @State private var showSettingsAlert = false
     @State private var showDuplicateTypeAlert = false
 
     // Local copies of phone types to prevent invalid state from being written
@@ -52,7 +50,26 @@ struct CardDetailView: View {
                     set: { card.phone3 = $0.isEmpty ? nil : $0 }
                 ), type: $phoneType3)
                 EditableRow(label: "Website", text: $card.website, icon: "globe")
-                EditableRow(label: "Address", text: $card.address, icon: "mappin.circle.fill")
+                EditableRow(label: "Address Line 1", text: Binding(
+                    get: { card.addressLine1 ?? "" },
+                    set: { card.addressLine1 = $0.isEmpty ? nil : $0 }
+                ), icon: "mappin.circle.fill")
+                EditableRow(label: "Address Line 2", text: Binding(
+                    get: { card.addressLine2 ?? "" },
+                    set: { card.addressLine2 = $0.isEmpty ? nil : $0 }
+                ), icon: "mappin.circle")
+                EditableRow(label: "City", text: Binding(
+                    get: { card.city ?? "" },
+                    set: { card.city = $0.isEmpty ? nil : $0 }
+                ), icon: "building")
+                EditableRow(label: "State", text: Binding(
+                    get: { card.state ?? "" },
+                    set: { card.state = $0.isEmpty ? nil : $0 }
+                ), icon: "map")
+                EditableRow(label: "Zip", text: Binding(
+                    get: { card.zip ?? "" },
+                    set: { card.zip = $0.isEmpty ? nil : $0 }
+                ), icon: "number")
             }
 
             if hasDuplicatePhoneTypes {
@@ -112,7 +129,7 @@ struct CardDetailView: View {
 
             Section {
                 Button {
-                    saveToContacts()
+                    showContactSave = true
                 } label: {
                     HStack {
                         Image(systemName: contactsSaved ? "checkmark.circle.fill" : "person.crop.circle.badge.plus")
@@ -120,7 +137,7 @@ struct CardDetailView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .disabled(isSavingToContacts || contactsSaved || hasDuplicatePhoneTypes)
+                .disabled(contactsSaved || hasDuplicatePhoneTypes)
 
                 if isNewScan {
                     Button {
@@ -179,7 +196,6 @@ struct CardDetailView: View {
         }
         .alert("Duplicate Phone Types", isPresented: $showDuplicateTypeAlert) {
             Button("Discard Changes", role: .destructive) {
-                // Revert local types back to saved values and go back
                 phoneType1 = card.phoneType ?? "Phone"
                 phoneType2 = card.phone2Type ?? "Cell"
                 phoneType3 = card.phone3Type ?? "Fax"
@@ -189,23 +205,11 @@ struct CardDetailView: View {
         } message: {
             Text("Phone type selections have duplicates. Going back will discard your unsaved type changes. Stay to fix them.")
         }
-        .alert("Contacts", isPresented: .init(
-            get: { alertMessage != nil },
-            set: { if !$0 { alertMessage = nil } }
-        )) {
-            Button("OK") { alertMessage = nil }
-        } message: {
-            Text(alertMessage ?? "")
-        }
-        .alert("Contacts Access Denied", isPresented: $showSettingsAlert) {
-            Button("Open Settings") {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
+        .sheet(isPresented: $showContactSave) {
+            ContactSaveView(contact: ContactsService.buildContact(from: card)) {
+                showContactSave = false
+                contactsSaved = true
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Contact access is denied. Please enable it in Settings to save cards to your contacts.")
         }
     }
 
@@ -232,20 +236,6 @@ struct CardDetailView: View {
         card.phone3Type = phoneType3
     }
 
-    private func saveToContacts() {
-        isSavingToContacts = true
-        Task {
-            do {
-                try await ContactsService.saveToContacts(card)
-                contactsSaved = true
-            } catch is ContactsError {
-                showSettingsAlert = true
-            } catch {
-                alertMessage = error.localizedDescription
-            }
-            isSavingToContacts = false
-        }
-    }
 }
 
 struct EditableRow: View {
