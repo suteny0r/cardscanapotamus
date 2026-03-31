@@ -44,7 +44,7 @@ struct ContactsService {
             ]
         }
 
-        let hasAddress = [card.addressLine1, card.addressLine2, card.city, card.state, card.zip]
+        let hasAddress = [card.addressLine1, card.addressLine2, card.city, card.state, card.zip, card.country]
             .contains { ($0 ?? "").isEmpty == false }
         if hasAddress {
             let postalAddress = CNMutablePostalAddress()
@@ -56,6 +56,7 @@ struct ContactsService {
             postalAddress.city = card.city ?? ""
             postalAddress.state = card.state ?? ""
             postalAddress.postalCode = card.zip ?? ""
+            postalAddress.country = card.country ?? ""
             contact.postalAddresses = [
                 CNLabeledValue(label: CNLabelWork, value: postalAddress)
             ]

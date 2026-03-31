@@ -92,8 +92,21 @@ struct CameraScannerView: View {
 
         Task {
             do {
-                let lines = try await OCRService.recognizeText(in: image)
-                var card = ContactParser.parse(lines: lines)
+                var card: ScannedCard
+
+                // Check for QR code with vCard first — if found, use it as sole source
+                let payloads = (try? await OCRService.detectBarcodes(in: image)) ?? []
+                let vcard = payloads.first(where: { VCardParser.isVCard($0) })
+
+                if let vcard {
+                    card = ScannedCard()
+                    VCardParser.apply(vcard: vcard, to: &card)
+                } else {
+                    // No vCard — fall back to OCR
+                    let lines = try await OCRService.recognizeText(in: image)
+                    card = ContactParser.parse(lines: lines)
+                }
+
                 card.imageData = image.jpegData(compressionQuality: 0.7)
                 card.source = defaultSource.isEmpty ? nil : defaultSource
                 scannedCard = card

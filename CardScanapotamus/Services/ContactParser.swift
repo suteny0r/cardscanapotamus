@@ -168,6 +168,41 @@ struct ContactParser {
             }
         }
         card.address = addressParts.joined(separator: ", ")
+
+        // Detect country from multiple signals
+        if card.country == nil {
+            // 1. Check address lines for a country name
+            for part in addressParts {
+                if let country = detectCountryFromText(part) {
+                    card.country = country
+                    break
+                }
+            }
+        }
+        if card.country == nil {
+            // 2. Check all unclaimed lines for a country name
+            for (line, _) in unclaimedLines {
+                if let country = detectCountryFromText(line) {
+                    card.country = country
+                    break
+                }
+            }
+        }
+        if card.country == nil {
+            // 3. Infer from email domain suffix (e.g. .com.br → Brazil)
+            card.country = detectCountryFromEmail(card.email)
+        }
+        if card.country == nil {
+            // 4. Infer from phone country code (e.g. +55 → Brazil)
+            let allPhones = [card.phone, card.phone2, card.phone3].compactMap { $0 }
+            for phone in allPhones {
+                if let country = detectCountryFromPhoneCode(phone) {
+                    card.country = country
+                    break
+                }
+            }
+        }
+
         return card
     }
 
@@ -311,6 +346,182 @@ struct ContactParser {
 
     private static func startsWithStreetNumber(_ text: String) -> Bool {
         return firstMatch(pattern: #"^\d+\s"#, in: text) != nil
+    }
+
+    // MARK: - Country detection
+
+    /// Common country names and variations → standardized country name
+    private static let countryNames: [String: String] = [
+        "usa": "United States", "u.s.a.": "United States", "u.s.a": "United States",
+        "united states": "United States", "united states of america": "United States",
+        "us": "United States", "u.s.": "United States",
+        "canada": "Canada",
+        "mexico": "Mexico", "méxico": "Mexico",
+        "uk": "United Kingdom", "u.k.": "United Kingdom",
+        "united kingdom": "United Kingdom", "great britain": "United Kingdom", "england": "United Kingdom",
+        "france": "France", "francia": "France",
+        "germany": "Germany", "deutschland": "Germany", "alemania": "Germany",
+        "italy": "Italy", "italia": "Italy",
+        "spain": "Spain", "españa": "Spain",
+        "portugal": "Portugal",
+        "brazil": "Brazil", "brasil": "Brazil",
+        "argentina": "Argentina",
+        "colombia": "Colombia",
+        "chile": "Chile",
+        "peru": "Peru", "perú": "Peru",
+        "china": "China",
+        "japan": "Japan",
+        "south korea": "South Korea", "korea": "South Korea",
+        "india": "India",
+        "australia": "Australia",
+        "new zealand": "New Zealand",
+        "israel": "Israel",
+        "turkey": "Turkey", "türkiye": "Turkey",
+        "saudi arabia": "Saudi Arabia",
+        "uae": "United Arab Emirates", "u.a.e.": "United Arab Emirates",
+        "united arab emirates": "United Arab Emirates",
+        "netherlands": "Netherlands", "holland": "Netherlands",
+        "belgium": "Belgium",
+        "switzerland": "Switzerland",
+        "austria": "Austria",
+        "sweden": "Sweden",
+        "norway": "Norway",
+        "denmark": "Denmark",
+        "finland": "Finland",
+        "ireland": "Ireland",
+        "poland": "Poland",
+        "czech republic": "Czech Republic", "czechia": "Czech Republic",
+        "singapore": "Singapore",
+        "malaysia": "Malaysia",
+        "indonesia": "Indonesia",
+        "philippines": "Philippines",
+        "thailand": "Thailand",
+        "vietnam": "Vietnam",
+        "taiwan": "Taiwan",
+        "hong kong": "Hong Kong",
+        "south africa": "South Africa",
+        "nigeria": "Nigeria",
+        "egypt": "Egypt",
+        "russia": "Russia",
+        "ukraine": "Ukraine",
+        "greece": "Greece",
+        "romania": "Romania",
+        "costa rica": "Costa Rica",
+        "panama": "Panama",
+        "puerto rico": "Puerto Rico",
+        "dominican republic": "Dominican Republic",
+    ]
+
+    /// Email ccTLD → country name
+    private static let domainCountries: [String: String] = [
+        "br": "Brazil", "mx": "Mexico", "ar": "Argentina", "co": "Colombia",
+        "cl": "Chile", "pe": "Peru", "ve": "Venezuela", "ec": "Ecuador",
+        "uk": "United Kingdom", "de": "Germany", "fr": "France", "it": "Italy",
+        "es": "Spain", "pt": "Portugal", "nl": "Netherlands", "be": "Belgium",
+        "ch": "Switzerland", "at": "Austria", "se": "Sweden", "no": "Norway",
+        "dk": "Denmark", "fi": "Finland", "ie": "Ireland", "pl": "Poland",
+        "cz": "Czech Republic", "gr": "Greece", "ro": "Romania", "ru": "Russia",
+        "ua": "Ukraine", "tr": "Turkey", "il": "Israel", "sa": "Saudi Arabia",
+        "ae": "United Arab Emirates", "in": "India", "cn": "China", "jp": "Japan",
+        "kr": "South Korea", "tw": "Taiwan", "hk": "Hong Kong", "sg": "Singapore",
+        "my": "Malaysia", "id": "Indonesia", "ph": "Philippines", "th": "Thailand",
+        "vn": "Vietnam", "au": "Australia", "nz": "New Zealand", "za": "South Africa",
+        "ng": "Nigeria", "eg": "Egypt", "ca": "Canada", "cr": "Costa Rica",
+        "pa": "Panama", "pr": "Puerto Rico", "do": "Dominican Republic",
+    ]
+
+    /// Phone calling code → country name (most common codes)
+    private static let phoneCodeCountries: [(prefix: String, country: String)] = [
+        ("+1", "United States"),  // also Canada, but US is more common
+        ("+44", "United Kingdom"),
+        ("+33", "France"),
+        ("+49", "Germany"),
+        ("+39", "Italy"),
+        ("+34", "Spain"),
+        ("+351", "Portugal"),
+        ("+55", "Brazil"),
+        ("+52", "Mexico"),
+        ("+54", "Argentina"),
+        ("+57", "Colombia"),
+        ("+56", "Chile"),
+        ("+51", "Peru"),
+        ("+58", "Venezuela"),
+        ("+91", "India"),
+        ("+86", "China"),
+        ("+81", "Japan"),
+        ("+82", "South Korea"),
+        ("+886", "Taiwan"),
+        ("+852", "Hong Kong"),
+        ("+65", "Singapore"),
+        ("+60", "Malaysia"),
+        ("+62", "Indonesia"),
+        ("+63", "Philippines"),
+        ("+66", "Thailand"),
+        ("+84", "Vietnam"),
+        ("+61", "Australia"),
+        ("+64", "New Zealand"),
+        ("+972", "Israel"),
+        ("+90", "Turkey"),
+        ("+966", "Saudi Arabia"),
+        ("+971", "United Arab Emirates"),
+        ("+27", "South Africa"),
+        ("+234", "Nigeria"),
+        ("+20", "Egypt"),
+        ("+7", "Russia"),
+        ("+380", "Ukraine"),
+        ("+31", "Netherlands"),
+        ("+32", "Belgium"),
+        ("+41", "Switzerland"),
+        ("+43", "Austria"),
+        ("+46", "Sweden"),
+        ("+47", "Norway"),
+        ("+45", "Denmark"),
+        ("+358", "Finland"),
+        ("+353", "Ireland"),
+        ("+48", "Poland"),
+        ("+420", "Czech Republic"),
+        ("+30", "Greece"),
+        ("+40", "Romania"),
+        ("+506", "Costa Rica"),
+        ("+507", "Panama"),
+    ]
+
+    private static func detectCountryFromText(_ text: String) -> String? {
+        let lower = text.lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: .punctuationCharacters)
+        // Check for exact match first (whole line is a country name)
+        if let country = countryNames[lower] { return country }
+        // Check if a country name appears as a word boundary in the text
+        for (name, country) in countryNames where name.count >= 4 {
+            if lower.contains(name) { return country }
+        }
+        return nil
+    }
+
+    private static func detectCountryFromEmail(_ email: String) -> String? {
+        guard !email.isEmpty else { return nil }
+        let parts = email.split(separator: ".")
+        guard parts.count >= 2 else { return nil }
+        // Check last segment as ccTLD
+        let tld = String(parts.last!).lowercased()
+        if let country = domainCountries[tld] { return country }
+        // Check second-to-last for compound domains like .com.br
+        if parts.count >= 3 {
+            let secondTld = String(parts[parts.count - 1]).lowercased()
+            if let country = domainCountries[secondTld] { return country }
+        }
+        return nil
+    }
+
+    private static func detectCountryFromPhoneCode(_ phone: String) -> String? {
+        let cleaned = phone.trimmingCharacters(in: .whitespaces)
+        guard cleaned.hasPrefix("+") else { return nil }
+        // Sort by longest prefix first to match +886 before +88
+        for entry in phoneCodeCountries.sorted(by: { $0.prefix.count > $1.prefix.count }) {
+            if cleaned.hasPrefix(entry.prefix) { return entry.country }
+        }
+        return nil
     }
 
     // MARK: - Helpers

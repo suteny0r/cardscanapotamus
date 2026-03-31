@@ -18,6 +18,7 @@ final class ScannedCard {
     var city: String?
     var state: String?
     var zip: String?
+    var country: String?
     var phone2: String?
     var phone3: String?
     var phoneType: String?
@@ -42,6 +43,7 @@ final class ScannedCard {
         city: String? = nil,
         state: String? = nil,
         zip: String? = nil,
+        country: String? = nil,
         phone2: String? = nil,
         phone3: String? = nil,
         phoneType: String? = nil,
@@ -65,6 +67,7 @@ final class ScannedCard {
         self.city = city
         self.state = state
         self.zip = zip
+        self.country = country
         self.phone2 = phone2
         self.phone3 = phone3
         self.phoneType = phoneType

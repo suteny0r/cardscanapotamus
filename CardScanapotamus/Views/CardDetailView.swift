@@ -13,6 +13,8 @@ struct CardDetailView: View {
     @State private var showContactSave = false
     @State private var showDeleteConfirm = false
     @State private var showDuplicateTypeAlert = false
+    @State private var showAddSource = false
+    @State private var newSourceName = ""
 
     // Local copies of phone types to prevent invalid state from being written
     @State private var phoneType1: String = "Phone"
@@ -70,6 +72,10 @@ struct CardDetailView: View {
                     get: { card.zip ?? "" },
                     set: { card.zip = $0.isEmpty ? nil : $0 }
                 ), icon: "number")
+                CountryPickerRow(country: Binding(
+                    get: { card.country ?? "" },
+                    set: { card.country = $0.isEmpty ? nil : $0 }
+                ))
             }
 
             if hasDuplicatePhoneTypes {
@@ -101,9 +107,17 @@ struct CardDetailView: View {
                             }
                         }
                         .labelsHidden()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .lineLimit(1)
+                        .fixedSize()
                     }
+                    Spacer()
+                    Button {
+                        newSourceName = ""
+                        showAddSource = true
+                    } label: {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.title3)
+                    }
+                    .buttonStyle(.borderless)
                 }
                 HStack(alignment: .top) {
                     Image(systemName: "note.text")
@@ -205,6 +219,18 @@ struct CardDetailView: View {
         } message: {
             Text("Phone type selections have duplicates. Going back will discard your unsaved type changes. Stay to fix them.")
         }
+        .alert("Add Source", isPresented: $showAddSource) {
+            TextField("Source name", text: $newSourceName)
+            Button("Add") {
+                let name = newSourceName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                guard !sourceOptions.contains(where: { $0.name == name }) else { return }
+                let option = SourceOption(name: name)
+                modelContext.insert(option)
+                card.source = name
+            }
+            Button("Cancel", role: .cancel) {}
+        }
         .sheet(isPresented: $showContactSave) {
             ContactSaveView(contact: ContactsService.buildContact(from: card)) {
                 showContactSave = false
@@ -273,6 +299,79 @@ struct PhoneRow: View {
             }
             .pickerStyle(.menu)
             .fixedSize()
+        }
+    }
+}
+
+struct CountryPickerRow: View {
+    @Binding var country: String
+    @State private var showPicker = false
+    @State private var searchText = ""
+
+    private static let countries: [String] = {
+        let codes = Locale.isoRegionCodes
+        return codes.compactMap { code in
+            Locale.current.localizedString(forRegionCode: code)
+        }.sorted()
+    }()
+
+    private var filteredCountries: [String] {
+        if searchText.isEmpty { return Self.countries }
+        return Self.countries.filter { $0.localizedCaseInsensitiveContains(searchText) }
+    }
+
+    var body: some View {
+        Button {
+            showPicker = true
+        } label: {
+            HStack {
+                Image(systemName: "flag")
+                    .foregroundStyle(.blue)
+                    .frame(width: 24)
+                Text(country.isEmpty ? "Country" : country)
+                    .foregroundStyle(country.isEmpty ? .tertiary : .primary)
+                Spacer()
+                if !country.isEmpty {
+                    Button {
+                        country = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showPicker) {
+            NavigationStack {
+                List {
+                    ForEach(filteredCountries, id: \.self) { name in
+                        Button {
+                            country = name
+                            showPicker = false
+                        } label: {
+                            HStack {
+                                Text(name)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                if name == country {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.blue)
+                                }
+                            }
+                        }
+                    }
+                }
+                .searchable(text: $searchText, prompt: "Search countries")
+                .navigationTitle("Select Country")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { showPicker = false }
+                    }
+                }
+            }
         }
     }
 }

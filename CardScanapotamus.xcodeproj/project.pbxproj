@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		287B961FC92BC76CDC12FC1D /* CameraScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A201D7F7FE8B84B4B14F86 /* CameraScannerView.swift */; };
+		3179571E39221C73CBEABA79 /* VCardParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A080EEE29BE1B595FE35DFC /* VCardParser.swift */; };
 		3669D7AA491DB29BB5A21CFC /* ManageSourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56E5EE5E86AEB8A29D586B1B /* ManageSourcesView.swift */; };
 		46681379B0A853DFE7622CAA /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC368058F8AD14CA67A6D08 /* OCRService.swift */; };
 		4BA1C9489851F4992809C11A /* CardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D28AC8E8FC063A81264A8A1 /* CardListView.swift */; };
@@ -36,6 +37,7 @@
 		79A201D7F7FE8B84B4B14F86 /* CameraScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraScannerView.swift; sourceTree = "<group>"; };
 		7DC42B54CCE5F90E3A1E1B13 /* ScannedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannedCard.swift; sourceTree = "<group>"; };
 		973F39DF2C1A17F9F114FC10 /* CardScanapotamus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CardScanapotamus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A080EEE29BE1B595FE35DFC /* VCardParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCardParser.swift; sourceTree = "<group>"; };
 		F4534261C9E40D781CF91E37 /* CardScanapotamusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardScanapotamusApp.swift; sourceTree = "<group>"; };
 		F4E7DBE280A8CD48174CDCE9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -78,6 +80,7 @@
 				2A2170DC5142F7ED6CC3C2BF /* ContactsService.swift */,
 				054F8F088047360D30AD8960 /* ExcelExporter.swift */,
 				0DC368058F8AD14CA67A6D08 /* OCRService.swift */,
+				9A080EEE29BE1B595FE35DFC /* VCardParser.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -193,6 +196,7 @@
 				46681379B0A853DFE7622CAA /* OCRService.swift in Sources */,
 				83573DAF92A37084AC6896E3 /* ScannedCard.swift in Sources */,
 				55DCF9B606995EA92665C80E /* SourceOption.swift in Sources */,
+				3179571E39221C73CBEABA79 /* VCardParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
