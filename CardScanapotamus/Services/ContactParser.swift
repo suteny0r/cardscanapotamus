@@ -39,7 +39,7 @@ struct ContactParser {
     /// Strip any leading non-alphanumeric character (likely a misread icon glyph).
     private static func stripLeadingGlyph(_ text: String) -> String {
         var result = text
-        while let first = result.first, !first.isLetter && !first.isNumber {
+        while let first = result.first, !first.isLetter && !first.isNumber && first != "+" {
             result = String(result.dropFirst()).trimmingCharacters(in: .whitespaces)
         }
         return result
@@ -58,7 +58,18 @@ struct ContactParser {
             .union(.init(charactersIn: "\u{2022}\u{2023}\u{25E6}\u{2043}\u{2219}"))
         let stripChars = bulletChars.union(.whitespacesAndNewlines)
 
+        // Pre-split lines on bullet/separator characters (•, ·, etc.)
+        // so that multiple fields on one line are processed individually
+        var expandedLines: [String] = []
         for line in lines {
+            let segments = line.components(separatedBy: CharacterSet(charactersIn: "•·▪"))
+            for segment in segments {
+                let trimmed = segment.trimmingCharacters(in: stripChars)
+                if !trimmed.isEmpty { expandedLines.append(trimmed) }
+            }
+        }
+
+        for line in expandedLines {
             let stripped = line.trimmingCharacters(in: stripChars)
             guard !stripped.isEmpty else { continue }
 
@@ -124,10 +135,7 @@ struct ContactParser {
 
         for (line, hint) in unclaimedLines {
             if hint == .address {
-                // Icon identified this as address
                 addressStarted = true
-                addressParts.append(line)
-            } else if addressStarted && looksLikeAddressContinuation(line) {
                 addressParts.append(line)
             } else if !nameAssigned && looksLikeName(line) {
                 card.fullName = line
@@ -140,6 +148,10 @@ struct ContactParser {
             } else if startsWithStreetNumber(line) {
                 addressStarted = true
                 addressParts.append(line)
+            } else if addressStarted {
+                // Once address has started, keep collecting lines that
+                // don't match name/title — they're likely city, state, etc.
+                addressParts.append(line)
             } else if !companyAssigned {
                 card.company = line
                 companyAssigned = true
@@ -150,6 +162,7 @@ struct ContactParser {
         if !addressParts.isEmpty {
             let lastLine = addressParts.last!
             if let cityStateZip = parseCityStateZip(lastLine) {
+                // Last line is "City, ST 12345" format
                 card.city = cityStateZip.city
                 card.state = cityStateZip.state
                 card.zip = cityStateZip.zip
@@ -161,9 +174,43 @@ struct ContactParser {
                     card.addressLine1 = remaining.first
                 }
             } else {
-                card.addressLine1 = addressParts.first
-                if addressParts.count > 1 {
-                    card.addressLine2 = addressParts.dropFirst().joined(separator: ", ")
+                // Parts may be individually split (e.g. from • separators)
+                // Try to identify each part: street, suite, city, state, country
+                var streetParts: [String] = []
+                for part in addressParts {
+                    let cleaned = part.trimmingCharacters(in: .punctuationCharacters)
+                        .trimmingCharacters(in: .whitespaces)
+                    guard !cleaned.isEmpty else { continue }
+
+                    // Check for zip code
+                    if card.zip == nil, firstMatch(pattern: #"^\d{5}(?:-\d{4})?$"#, in: cleaned) != nil {
+                        card.zip = cleaned
+                    }
+                    // Check for 2-letter state abbreviation
+                    else if card.state == nil, cleaned.count == 2,
+                            cleaned == cleaned.uppercased(),
+                            cleaned.allSatisfy(\.isLetter) {
+                        card.state = cleaned
+                    }
+                    // Check for country name
+                    else if card.country == nil, detectCountryFromText(cleaned) != nil {
+                        card.country = detectCountryFromText(cleaned)
+                    }
+                    // Everything else is street/city
+                    else {
+                        streetParts.append(cleaned)
+                    }
+                }
+                // First street part is address line 1, rest builds city or line 2
+                if !streetParts.isEmpty {
+                    card.addressLine1 = streetParts[0]
+                    if streetParts.count == 2 {
+                        // Second part is likely the city
+                        card.city = streetParts[1]
+                    } else if streetParts.count > 2 {
+                        card.addressLine2 = streetParts[1]
+                        card.city = streetParts.dropFirst(2).joined(separator: ", ")
+                    }
                 }
             }
         }
@@ -201,6 +248,11 @@ struct ContactParser {
                     break
                 }
             }
+        }
+
+        // Default to United States if no country detected
+        if card.country == nil {
+            card.country = "United States"
         }
 
         return card
@@ -264,7 +316,7 @@ struct ContactParser {
     }
 
     private static func extractWebsite(from text: String) -> String? {
-        let pattern = #"(?:https?://)?(?:www\.)?[A-Za-z0-9-]+\.[A-Za-z]{2,}(?:/[^\s]*)?"#
+        let pattern = #"(?:https?://)?(?:www\.)?[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+(?:/[^\s]*)?"#
         if let match = firstMatch(pattern: pattern, in: text),
            match.contains("."),
            !match.contains("@") {
@@ -345,7 +397,18 @@ struct ContactParser {
     }
 
     private static func startsWithStreetNumber(_ text: String) -> Bool {
-        return firstMatch(pattern: #"^\d+\s"#, in: text) != nil
+        if firstMatch(pattern: #"^\d+\s"#, in: text) != nil { return true }
+        // International street name prefixes
+        let lower = text.lowercased()
+        let streetPrefixes = [
+            "estrada ", "rua ", "avenida ", "av ", "av. ", "alameda ", "travessa ",
+            "rodovia ", "praca ", "praça ",
+            "calle ", "carrera ", "paseo ", "camino ",
+            "strasse ", "straße ", "gasse ",
+            "rue ", "boulevard ", "allée ",
+            "via ", "corso ", "piazza ", "viale ",
+        ]
+        return streetPrefixes.contains { lower.hasPrefix($0) }
     }
 
     // MARK: - Country detection
