@@ -10,7 +10,7 @@ struct CameraScannerView: View {
     @State private var isProcessing = false
     @State private var scannedCard: ScannedCard?
     @State private var errorMessage: String?
-    @State private var showImagePicker = false
+    @State private var showCamera = false
 
     var body: some View {
         NavigationStack {
@@ -37,12 +37,13 @@ struct CameraScannerView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showImagePicker) {
-                ImagePicker(sourceType: .camera) { image in
+            .fullScreenCover(isPresented: $showCamera) {
+                CameraView { image in
                     if let image {
                         processImage(image)
                     }
                 }
+                .ignoresSafeArea()
             }
             .alert("Error", isPresented: .init(
                 get: { errorMessage != nil },
@@ -71,7 +72,7 @@ struct CameraScannerView: View {
                 .foregroundStyle(.secondary)
 
             Button {
-                showImagePicker = true
+                showCamera = true
             } label: {
                 Label("Take Photo", systemImage: "camera.fill")
                     .frame(maxWidth: .infinity)
@@ -118,42 +119,118 @@ struct CameraScannerView: View {
     }
 }
 
-// MARK: - UIImagePickerController Wrapper
+// MARK: - Custom Camera with AVCaptureSession
 
-struct ImagePicker: UIViewControllerRepresentable {
-    let sourceType: UIImagePickerController.SourceType
+struct CameraView: UIViewControllerRepresentable {
     let onImagePicked: (UIImage?) -> Void
 
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = sourceType
-        picker.delegate = context.coordinator
-        return picker
+    func makeUIViewController(context: Context) -> CameraViewController {
+        let vc = CameraViewController()
+        vc.onImagePicked = onImagePicked
+        return vc
     }
 
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {}
+}
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onImagePicked: onImagePicked)
+class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
+    var onImagePicked: ((UIImage?) -> Void)?
+
+    private let captureSession = AVCaptureSession()
+    private let photoOutput = AVCapturePhotoOutput()
+    private var previewLayer: AVCaptureVideoPreviewLayer!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+        setupCamera()
+        setupUI()
     }
 
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let onImagePicked: (UIImage?) -> Void
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer?.frame = view.bounds
+    }
 
-        init(onImagePicked: @escaping (UIImage?) -> Void) {
-            self.onImagePicked = onImagePicked
+    private func setupCamera() {
+        captureSession.sessionPreset = .photo
+
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+              let input = try? AVCaptureDeviceInput(device: device) else { return }
+
+        if captureSession.canAddInput(input) {
+            captureSession.addInput(input)
+        }
+        if captureSession.canAddOutput(photoOutput) {
+            captureSession.addOutput(photoOutput)
         }
 
-        func imagePickerController(_ picker: UIImagePickerController,
-                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-            let image = info[.originalImage] as? UIImage
-            picker.dismiss(animated: true)
-            onImagePicked(image)
-        }
+        // Set 2x zoom
+        try? device.lockForConfiguration()
+        device.videoZoomFactor = min(2.0, device.activeFormat.videoMaxZoomFactor)
+        device.unlockForConfiguration()
 
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
-            onImagePicked(nil)
+        // Preview layer
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(previewLayer)
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.captureSession.startRunning()
         }
+    }
+
+    private func setupUI() {
+        // Cancel button
+        let cancelButton = UIButton(type: .system)
+        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.setTitleColor(.white, for: .normal)
+        cancelButton.titleLabel?.font = .systemFont(ofSize: 18)
+        cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(cancelButton)
+
+        // Capture button — white circle
+        let captureButton = UIButton(type: .custom)
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        captureButton.layer.cornerRadius = 35
+        captureButton.layer.borderWidth = 4
+        captureButton.layer.borderColor = UIColor.white.cgColor
+        captureButton.backgroundColor = UIColor.white.withAlphaComponent(0.9)
+        captureButton.addTarget(self, action: #selector(captureTapped), for: .touchUpInside)
+        view.addSubview(captureButton)
+
+        NSLayoutConstraint.activate([
+            cancelButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+
+            captureButton.widthAnchor.constraint(equalToConstant: 70),
+            captureButton.heightAnchor.constraint(equalToConstant: 70),
+            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+        ])
+    }
+
+    @objc private func cancelTapped() {
+        captureSession.stopRunning()
+        onImagePicked?(nil)
+        dismiss(animated: true)
+    }
+
+    @objc private func captureTapped() {
+        let settings = AVCapturePhotoSettings()
+        photoOutput.capturePhoto(with: settings, delegate: self)
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        captureSession.stopRunning()
+        guard let data = photo.fileDataRepresentation(),
+              let image = UIImage(data: data) else {
+            onImagePicked?(nil)
+            dismiss(animated: true)
+            return
+        }
+        onImagePicked?(image)
+        dismiss(animated: true)
     }
 }
