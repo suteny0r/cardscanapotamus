@@ -239,13 +239,22 @@ struct CardDetailView: View {
         }
     }
 
+    /// Only check types for phone fields that have a number entered.
+    private var activePhoneTypes: [String] {
+        var types: [String] = []
+        if !card.phone.isEmpty { types.append(phoneType1) }
+        if !(card.phone2 ?? "").isEmpty { types.append(phoneType2) }
+        if !(card.phone3 ?? "").isEmpty { types.append(phoneType3) }
+        return types
+    }
+
     private var hasDuplicatePhoneTypes: Bool {
-        let types = [phoneType1, phoneType2, phoneType3]
+        let types = activePhoneTypes
         return Set(types).count < types.count
     }
 
     private var duplicatePhoneTypeMessage: String {
-        let types = [phoneType1, phoneType2, phoneType3]
+        let types = activePhoneTypes
         var seen = Set<String>()
         var dupes = Set<String>()
         for t in types {

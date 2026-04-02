@@ -16,12 +16,13 @@ targets:
         INFOPLIST_FILE: CardScanapotamus/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.stevebliss.CardScanapotamus
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: 1
+        CURRENT_PROJECT_VERSION: 2
         SWIFT_VERSION: "5.9"
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: NP58A25HR5
+        CODE_SIGN_ENTITLEMENTS: CardScanapotamus/CardScanapotamus.entitlements
       configs:
         Debug:
           CODE_SIGN_IDENTITY: "Apple Development"

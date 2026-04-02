@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var showDeleteAllConfirm = false
     @State private var exportItem: ExportItem?
     @State private var exportError: String?
+    @AppStorage("debugMode") private var debugMode: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -21,13 +22,18 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     HStack(spacing: 8) {
-                        Text("Card Scan")
-                            .font(.largeTitle.bold())
                         Image("AppIconImage")
                             .resizable()
-                            .scaledToFit()
+                            .scaledToFill()
                             .frame(width: 32, height: 32)
                             .clipShape(RoundedRectangle(cornerRadius: 7))
+                            .overlay(
+                                debugMode ? RoundedRectangle(cornerRadius: 7)
+                                    .stroke(.red, lineWidth: 2) : nil
+                            )
+                            .onLongPressGesture {
+                                debugMode.toggle()
+                            }
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -56,7 +62,7 @@ struct ContentView: View {
             .sheet(item: $activeSheet) { sheet in
                 switch sheet {
                 case .scanner:
-                    CameraScannerView(defaultSource: selectedSource)
+                    CameraScannerView(defaultSource: selectedSource, debugMode: debugMode)
                 case .manageSources:
                     ManageSourcesView()
                 }

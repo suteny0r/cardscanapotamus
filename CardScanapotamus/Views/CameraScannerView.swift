@@ -1,8 +1,10 @@
 import SwiftUI
 import AVFoundation
+import PhotosUI
 
 struct CameraScannerView: View {
     var defaultSource: String = ""
+    var debugMode: Bool = false
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -11,6 +13,8 @@ struct CameraScannerView: View {
     @State private var scannedCard: ScannedCard?
     @State private var errorMessage: String?
     @State private var showCamera = false
+    @State private var showPhotoPicker = false
+    @State private var showFilePicker = false
 
     var body: some View {
         NavigationStack {
@@ -44,6 +48,20 @@ struct CameraScannerView: View {
                     }
                 }
                 .ignoresSafeArea()
+            }
+            .sheet(isPresented: $showPhotoPicker) {
+                PhotoLibraryPicker { image in
+                    if let image {
+                        processImage(image)
+                    }
+                }
+            }
+            .sheet(isPresented: $showFilePicker) {
+                FileImagePicker { image in
+                    if let image {
+                        processImage(image)
+                    }
+                }
             }
             .alert("Error", isPresented: .init(
                 get: { errorMessage != nil },
@@ -83,6 +101,30 @@ struct CameraScannerView: View {
             }
             .padding(.horizontal, 32)
 
+            Button {
+                showPhotoPicker = true
+            } label: {
+                Label("Choose from Photos", systemImage: "photo.on.rectangle")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.gray.opacity(0.2))
+                    .foregroundStyle(.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .padding(.horizontal, 32)
+
+            Button {
+                showFilePicker = true
+            } label: {
+                Label("Choose from Files", systemImage: "folder")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(.gray.opacity(0.2))
+                    .foregroundStyle(.blue)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .padding(.horizontal, 32)
+
             Spacer()
         }
     }
@@ -111,6 +153,11 @@ struct CameraScannerView: View {
                 card.imageData = image.jpegData(compressionQuality: 0.7)
                 card.source = defaultSource.isEmpty ? nil : defaultSource
                 scannedCard = card
+
+                // Save debug data to iCloud if debug mode is on
+                if debugMode {
+                    DebugExporter.saveToICloud(image: image, card: card)
+                }
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -232,5 +279,92 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         }
         onImagePicked?(image)
         dismiss(animated: true)
+    }
+}
+
+// MARK: - Photo Library Picker
+
+struct PhotoLibraryPicker: UIViewControllerRepresentable {
+    let onImagePicked: (UIImage?) -> Void
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImagePicked: onImagePicked)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let onImagePicked: (UIImage?) -> Void
+
+        init(onImagePicked: @escaping (UIImage?) -> Void) {
+            self.onImagePicked = onImagePicked
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            let image = info[.originalImage] as? UIImage
+            picker.dismiss(animated: true)
+            onImagePicked(image)
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
+            onImagePicked(nil)
+        }
+    }
+}
+
+// MARK: - File Picker for images
+
+import UniformTypeIdentifiers
+
+struct FileImagePicker: UIViewControllerRepresentable {
+    let onImagePicked: (UIImage?) -> Void
+
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.image])
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImagePicked: onImagePicked)
+    }
+
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let onImagePicked: (UIImage?) -> Void
+
+        init(onImagePicked: @escaping (UIImage?) -> Void) {
+            self.onImagePicked = onImagePicked
+        }
+
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            guard let url = urls.first else {
+                onImagePicked(nil)
+                return
+            }
+            let accessing = url.startAccessingSecurityScopedResource()
+            defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+
+            if let data = try? Data(contentsOf: url),
+               let image = UIImage(data: data) {
+                onImagePicked(image)
+            } else {
+                onImagePicked(nil)
+            }
+        }
+
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            onImagePicked(nil)
+        }
     }
 }
