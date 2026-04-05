@@ -1,0 +1,122 @@
+===========================================================
+ CardScan-apotamus — App Store Connect Listing
+===========================================================
+ Copy each section into its corresponding field in
+ App Store Connect. All fields are plain text (no markup).
+===========================================================
+
+
+--- SUBTITLE (30 characters max) ---
+
+Business Card Scanner & Export
+
+
+--- PROMOTIONAL TEXT (170 characters max, can be updated without a new build) ---
+
+Scan business cards instantly with your camera or import from photos and files. Export to Excel, save to Contacts, and tag cards by source — all on your iPhone.
+
+
+--- DESCRIPTION (4000 characters max) ---
+
+CardScan-apotamus turns your iPhone into a powerful business card scanner. Snap a photo, and advanced OCR instantly extracts names, titles, companies, phone numbers, emails, websites, and full mailing addresses — no typing required.
+
+SCAN YOUR WAY
+• Camera: Take a photo with a zoomed-in camera optimized for business cards
+• Photo Library: Import card images you've already captured
+• Files: Pick card images from iCloud Drive or other file providers
+• QR Codes: Automatically reads vCard QR codes on business cards for perfect accuracy
+
+SMART FIELD EXTRACTION
+The built-in OCR engine intelligently parses business card text into structured fields:
+• Name, job title, and company
+• Email address and website (including international domains)
+• Up to 3 phone numbers with automatic Phone, Cell, and Fax type detection
+• Full mailing address broken into street, city, state, zip, and country
+• International address and phone format support
+
+Every field is fully editable — review and correct anything before saving.
+
+ORGANIZE WITH SOURCES
+Tag each card with a source like a trade show, conference, or event name. Create and manage source tags right from the app. Filter your card list by source to stay organized.
+
+EXPORT TO EXCEL
+Share your scanned cards as a professionally formatted .xlsx spreadsheet. All fields are included: name, title, company, email, phone, cell, fax, website, full address, source, notes, and date scanned. Perfect for importing into your CRM or contact management system.
+
+SAVE TO CONTACTS
+Add scanned cards directly to your iPhone Contacts with one tap. Review the contact card before saving — no surprises.
+
+BUILT FOR PRIVACY
+CardScan-apotamus processes everything on your device. Your business card data is never uploaded to external servers. No account required. No ads. No tracking.
+
+ADDITIONAL FEATURES
+• Card image saved with each scan for reference
+• Notes field for adding context to any card
+• Delete individual cards or clear all at once
+• Swipe to delete from the card list
+• Card thumbnails in the list view for quick identification
+
+
+--- KEYWORDS (100 characters max, comma-separated, no spaces after commas) ---
+
+business card,scanner,OCR,scan,contacts,vcard,QR,excel,export,trade show,networking,card reader
+
+
+--- WHAT'S NEW (for version 1.0.0) ---
+
+Hello, world! CardScan-apotamus is here to devour your business card pile.
+
+
+===========================================================
+ SUGGESTED SCREENSHOTS
+===========================================================
+
+App Store requires 6.7" (iPhone 15 Pro Max / 16 Pro Max)
+and optionally 6.5" and 5.5" sizes. Aim for 5-8 screenshots.
+They appear in order, so lead with the most compelling.
+
+1. CARD LIST (main screen)
+   - Show 4-6 scanned cards with thumbnails, names, companies,
+     and at least one source tag badge visible
+   - Demonstrates the app's core value at a glance
+
+2. CAMERA SCANNING
+   - Show the camera view with a business card in frame
+   - The zoomed-in viewfinder with the capture button visible
+
+3. SCAN OPTIONS
+   - Show the "Scan a Business Card" prompt screen with all
+     three options: Take Photo, Choose from Photos, Choose
+     from Files
+
+4. CARD DETAIL — CONTACT INFO (top half)
+   - Show a fully populated card after scanning
+   - Card image at top, name/title/company fields filled in
+   - Shows the quality of OCR extraction
+
+5. CARD DETAIL — CONTACT DETAILS (scrolled down)
+   - Show phone numbers with type dropdowns (Phone/Cell/Fax),
+     email, website, and structured address fields
+   - Demonstrates the depth of data capture
+
+6. SAVE TO CONTACTS
+   - Show the iOS contact card preview that appears when
+     tapping "Save to Contacts"
+   - Proves seamless integration with iPhone Contacts
+
+7. EXPORT SHARE SHEET
+   - Show the share sheet that appears after tapping the
+     export button, with "ScannedCards.xlsx" visible
+   - Demonstrates the Excel export feature
+
+8. SOURCE TAGGING
+   - Show the source picker bar at the top of the main screen
+     with a source selected and the manage sources view
+   - Demonstrates the organizational capability
+
+SCREENSHOT TIPS:
+- Use real (or realistic) business card data, not placeholder text
+- Ensure cards show a variety of companies and names
+- Show at least one card with a source tag in the list view
+- Consider using a status bar showing full signal and battery
+- Keep the status bar time clean (e.g., 9:41 — Apple's
+  preferred screenshot time)

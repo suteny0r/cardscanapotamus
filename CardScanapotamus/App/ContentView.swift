@@ -98,7 +98,7 @@ struct ContentView: View {
 
     private func exportToExcel() {
         do {
-            let url = try ExcelExporter.generateXLSX(from: cards)
+            let url = try ExcelExporter.generateXLSX(from: cards, source: selectedSource)
             exportItem = ExportItem(url: url)
         } catch {
             exportError = error.localizedDescription

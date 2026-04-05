@@ -2,9 +2,16 @@ import Foundation
 import Compression
 
 struct ExcelExporter {
-    static func generateXLSX(from cards: [ScannedCard]) throws -> URL {
+    static func generateXLSX(from cards: [ScannedCard], source: String = "") throws -> URL {
         let tempDir = FileManager.default.temporaryDirectory
-        let xlsxURL = tempDir.appendingPathComponent("ScannedCards.xlsx")
+        let dateStr = {
+            let f = DateFormatter()
+            f.dateFormat = "yyyy-MM-dd"
+            return f.string(from: Date())
+        }()
+        let prefix = source.isEmpty ? "ScannedCards" : source
+        let filename = "\(prefix)-\(dateStr).xlsx"
+        let xlsxURL = tempDir.appendingPathComponent(filename)
         try? FileManager.default.removeItem(at: xlsxURL)
 
         // Build shared strings

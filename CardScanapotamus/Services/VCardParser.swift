@@ -13,7 +13,10 @@ struct VCardParser {
             let (property, value) = parseLine(line)
             guard !value.isEmpty else { continue }
 
-            switch property.uppercased() {
+            // Extract base property name (before any ;PARAMS)
+            let baseName = property.split(separator: ";").first.map(String.init)?.uppercased() ?? property.uppercased()
+
+            switch baseName {
             case "FN":
                 card.fullName = value
             case "N":
@@ -33,15 +36,12 @@ struct VCardParser {
                 if card.website.isEmpty { card.website = value }
             case "NOTE":
                 card.notes = value
+            case "TEL":
+                assignPhone(property: property, value: value, card: &card)
+            case "ADR":
+                parseAddress(value: value, card: &card)
             default:
-                // Handle TEL with type parameters
-                if property.uppercased().hasPrefix("TEL") {
-                    assignPhone(property: property, value: value, card: &card)
-                }
-                // Handle ADR
-                else if property.uppercased().hasPrefix("ADR") {
-                    parseAddress(value: value, card: &card)
-                }
+                break
             }
         }
     }
@@ -118,8 +118,27 @@ struct VCardParser {
             }
         }
         if parts.count > 3 && !parts[3].isEmpty { card.city = parts[3] }
-        if parts.count > 4 && !parts[4].isEmpty { card.state = parts[4] }
+
+        let stateVal = parts.count > 4 ? parts[4] : ""
+        let countryVal = parts.count > 6 ? parts[6] : ""
+
+        if !stateVal.isEmpty && countryVal.isEmpty && isCountryName(stateVal) {
+            // vCard placed country in the state/region slot with empty country field
+            card.country = stateVal
+        } else {
+            if !stateVal.isEmpty { card.state = stateVal }
+            if !countryVal.isEmpty { card.country = countryVal }
+        }
+
         if parts.count > 5 && !parts[5].isEmpty { card.zip = parts[5] }
-        if parts.count > 6 && !parts[6].isEmpty { card.country = parts[6] }
+    }
+
+    /// Check if a string is a recognized country name using Locale data.
+    private static func isCountryName(_ text: String) -> Bool {
+        let codes = Locale.isoRegionCodes
+        return codes.contains { code in
+            guard let name = Locale.current.localizedString(forRegionCode: code) else { return false }
+            return name.caseInsensitiveCompare(text) == .orderedSame
+        }
     }
 }

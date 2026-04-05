@@ -186,6 +186,8 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     private let captureSession = AVCaptureSession()
     private let photoOutput = AVCapturePhotoOutput()
     private var previewLayer: AVCaptureVideoPreviewLayer!
+    private var captureDevice: AVCaptureDevice?
+    private var lastZoomFactor: CGFloat = 1.5
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -205,6 +207,8 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
               let input = try? AVCaptureDeviceInput(device: device) else { return }
 
+        captureDevice = device
+
         if captureSession.canAddInput(input) {
             captureSession.addInput(input)
         }
@@ -212,9 +216,11 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             captureSession.addOutput(photoOutput)
         }
 
-        // Set 2x zoom
+        // Set default 1.5x zoom
         try? device.lockForConfiguration()
-        device.videoZoomFactor = min(2.0, device.activeFormat.videoMaxZoomFactor)
+        let defaultZoom: CGFloat = 1.5
+        device.videoZoomFactor = min(defaultZoom, device.activeFormat.videoMaxZoomFactor)
+        lastZoomFactor = device.videoZoomFactor
         device.unlockForConfiguration()
 
         // Preview layer
@@ -228,6 +234,10 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     }
 
     private func setupUI() {
+        // Pinch-to-zoom gesture
+        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
+        view.addGestureRecognizer(pinch)
+
         // Cancel button
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Cancel", for: .normal)
@@ -256,6 +266,24 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
         ])
+    }
+
+    @objc private func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        guard let device = captureDevice else { return }
+
+        switch gesture.state {
+        case .began:
+            lastZoomFactor = device.videoZoomFactor
+        case .changed:
+            let newZoom = max(1.0, min(lastZoomFactor * gesture.scale, device.activeFormat.videoMaxZoomFactor))
+            try? device.lockForConfiguration()
+            device.videoZoomFactor = newZoom
+            device.unlockForConfiguration()
+        case .ended:
+            lastZoomFactor = device.videoZoomFactor
+        default:
+            break
+        }
     }
 
     @objc private func cancelTapped() {
