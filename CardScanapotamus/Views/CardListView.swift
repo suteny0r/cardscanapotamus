@@ -30,7 +30,7 @@ struct CardListView: View {
 
     private func cardRow(_ card: ScannedCard) -> some View {
         HStack(spacing: 12) {
-            if let imageData = card.imageData, let uiImage = UIImage(data: imageData) {
+            if let uiImage = CardImage.decode(card.imageData, maxPixel: 240) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()

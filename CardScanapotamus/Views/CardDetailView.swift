@@ -24,12 +24,21 @@ struct CardDetailView: View {
     @State private var backError: String?
     @State private var hasOfferedBack = false
 
+    // Duplicate check for saved cards
+    @State private var foundDuplicates: [ScannedCard] = []
+    @State private var showDuplicateResult = false
+    @State private var duplicatesMergedCount: Int?
+
     // Local copies of phone types to prevent invalid state from being written
     @State private var phoneType1: String = "Phone"
     @State private var phoneType2: String = "Cell"
     @State private var phoneType3: String = "Fax"
 
     var body: some View {
+        withDuplicateDialogs(withBackSideDialogs(mainList))
+    }
+
+    private var mainList: some View {
         List {
             cardImagesSection
 
@@ -133,43 +142,7 @@ struct CardDetailView: View {
 
             RawTextSections(front: card.rawText, back: card.backRawText)
 
-            Section {
-                Button {
-                    showContactSave = true
-                } label: {
-                    HStack {
-                        Image(systemName: contactsSaved ? "checkmark.circle.fill" : "person.crop.circle.badge.plus")
-                        Text(contactsSaved ? "Saved to Contacts" : "Save to Contacts")
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .disabled(contactsSaved || hasDuplicatePhoneTypes)
-
-                if isNewScan {
-                    Button {
-                        onSave?()
-                    } label: {
-                        HStack {
-                            Image(systemName: "square.and.arrow.down.fill")
-                            Text("Save Card")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .disabled(hasDuplicatePhoneTypes)
-                }
-
-                if !isNewScan {
-                    Button(role: .destructive) {
-                        showDeleteConfirm = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "trash")
-                            Text("Delete Card")
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-            }
+            actionsSection
         }
         .navigationTitle(card.fullName.isEmpty ? "Scanned Card" : card.fullName)
         .navigationBarTitleDisplayMode(.inline)
@@ -187,59 +160,6 @@ struct CardDetailView: View {
             phoneType1 = card.phoneType ?? "Phone"
             phoneType2 = card.phone2Type ?? "Cell"
             phoneType3 = card.phone3Type ?? "Fax"
-        }
-        .task {
-            // Offer to scan the back once, right after a new front scan.
-            guard isNewScan, !hasOfferedBack, card.backImageData == nil else { return }
-            hasOfferedBack = true
-            try? await Task.sleep(for: .milliseconds(400))
-            showBackPrompt = true
-        }
-        .overlay {
-            if isProcessingBack {
-                ZStack {
-                    Color.black.opacity(0.25).ignoresSafeArea()
-                    ProgressView("Scanning back of card...")
-                        .padding(24)
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-                }
-            }
-        }
-        .confirmationDialog(
-            card.backImageData == nil ? "Scan the back of this card?" : "Replace the back of this card?",
-            isPresented: $showBackPrompt,
-            titleVisibility: .visible
-        ) {
-            Button("Take Photo of Back") { showBackCamera = true }
-            Button("Choose from Photos") { showBackPhotoPicker = true }
-            if card.backImageData != nil {
-                Button("Remove Back", role: .destructive) {
-                    card.backImageData = nil
-                    card.backRawText = nil
-                }
-            }
-            Button(card.backImageData == nil ? "No Back Side" : "Cancel", role: .cancel) {}
-        } message: {
-            Text("Anything found on the back fills in details the front didn't have.")
-        }
-        .fullScreenCover(isPresented: $showBackCamera) {
-            CameraView { image in
-                if let image { processBackImage(image) }
-            }
-            .ignoresSafeArea()
-        }
-        .sheet(isPresented: $showBackPhotoPicker) {
-            PhotoLibraryPicker { image in
-                if let image { processBackImage(image) }
-            }
-        }
-        .alert("Back Scan Failed", isPresented: .init(
-            get: { backError != nil },
-            set: { if !$0 { backError = nil } }
-        )) {
-            Button("OK") { backError = nil }
-        } message: {
-            Text(backError ?? "")
         }
         .onChange(of: phoneType1) { syncPhoneTypes() }
         .onChange(of: phoneType2) { syncPhoneTypes() }
@@ -284,6 +204,95 @@ struct CardDetailView: View {
         }
     }
 
+    private func withBackSideDialogs<V: View>(_ content: V) -> some View {
+        content
+        .task {
+            // Offer to scan the back once, right after a new front scan.
+            guard isNewScan, !hasOfferedBack, card.backImageData == nil else { return }
+            hasOfferedBack = true
+            try? await Task.sleep(for: .milliseconds(400))
+            showBackPrompt = true
+        }
+        .overlay {
+            if isProcessingBack {
+                ZStack {
+                    Color.black.opacity(0.25).ignoresSafeArea()
+                    ProgressView("Scanning back of card...")
+                        .padding(24)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                }
+            }
+        }
+        .confirmationDialog(
+            backPromptTitle,
+            isPresented: $showBackPrompt,
+            titleVisibility: .visible
+        ) {
+            Button("Take Photo of Back") { showBackCamera = true }
+            Button("Choose from Photos") { showBackPhotoPicker = true }
+            if card.backImageData != nil {
+                Button("Remove Back", role: .destructive) {
+                    card.backImageData = nil
+                    card.backRawText = nil
+                }
+            }
+            Button(card.backImageData == nil ? "No Back Side" : "Cancel", role: .cancel) {}
+        } message: {
+            Text("Anything found on the back fills in details the front didn't have.")
+        }
+        .fullScreenCover(isPresented: $showBackCamera) {
+            CameraView { image in
+                if let image { processBackImage(image) }
+            }
+            .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showBackPhotoPicker) {
+            PhotoLibraryPicker { image in
+                if let image { processBackImage(image) }
+            }
+        }
+        .alert("Back Scan Failed", isPresented: .init(
+            get: { backError != nil },
+            set: { if !$0 { backError = nil } }
+        )) {
+            Button("OK") { backError = nil }
+        } message: {
+            Text(backError ?? "")
+        }
+    }
+
+    private func withDuplicateDialogs<V: View>(_ content: V) -> some View {
+        content
+        .confirmationDialog(
+            duplicateResultTitle,
+            isPresented: $showDuplicateResult,
+            titleVisibility: .visible
+        ) {
+            if !foundDuplicates.isEmpty {
+                Button("Merge Into This Card") {
+                    let count = foundDuplicates.count
+                    CardMerger.absorb(foundDuplicates, into: card, context: modelContext)
+                    foundDuplicates = []
+                    phoneType1 = card.phoneType ?? "Phone"
+                    phoneType2 = card.phone2Type ?? "Cell"
+                    phoneType3 = card.phone3Type ?? "Fax"
+                    duplicatesMergedCount = count
+                }
+            }
+            Button(foundDuplicates.isEmpty ? "OK" : "Cancel", role: .cancel) { foundDuplicates = [] }
+        } message: {
+            Text(duplicateResultMessage)
+        }
+        .alert("Duplicates Merged", isPresented: .init(
+            get: { duplicatesMergedCount != nil },
+            set: { if !$0 { duplicatesMergedCount = nil } }
+        )) {
+            Button("OK") { duplicatesMergedCount = nil }
+        } message: {
+            Text(duplicatesMergedMessage)
+        }
+    }
+
     // MARK: - Card images
 
     private var cardImagesSection: some View {
@@ -309,6 +318,89 @@ struct CardDetailView: View {
                 backError = error.localizedDescription
             }
             isProcessingBack = false
+        }
+    }
+
+    private var backPromptTitle: String {
+        card.backImageData == nil ? "Scan the back of this card?" : "Replace the back of this card?"
+    }
+
+    private var duplicateResultTitle: String {
+        if foundDuplicates.isEmpty { return "No Duplicates Found" }
+        return "\(foundDuplicates.count) Duplicate\(foundDuplicates.count == 1 ? "" : "s") Found"
+    }
+
+    private var duplicateResultMessage: String {
+        if foundDuplicates.isEmpty {
+            return "No other saved cards match this contact's email, phone, or name and company."
+        }
+        return duplicateSummary + "\n\nMerging keeps this card, fills in any blank fields from the others, and deletes them."
+    }
+
+    private var duplicatesMergedMessage: String {
+        let n = duplicatesMergedCount ?? 0
+        return "\(n) card\(n == 1 ? "" : "s") merged into this one."
+    }
+
+    private var duplicateSummary: String {
+        let df = DateFormatter()
+        df.dateStyle = .medium
+        return foundDuplicates.prefix(5).map { dup in
+            let label = [dup.fullName, dup.company].filter { !$0.isEmpty }.joined(separator: ", ")
+            return "• \(label.isEmpty ? "Unnamed card" : label) (\(df.string(from: dup.scannedAt)))"
+        }.joined(separator: "\n") + (foundDuplicates.count > 5 ? "\n• and \(foundDuplicates.count - 5) more" : "")
+    }
+
+    // MARK: - Actions
+
+    private var actionsSection: some View {
+        Section {
+            Button {
+                showContactSave = true
+            } label: {
+                HStack {
+                    Image(systemName: contactsSaved ? "checkmark.circle.fill" : "person.crop.circle.badge.plus")
+                    Text(contactsSaved ? "Saved to Contacts" : "Save to Contacts")
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .disabled(contactsSaved || hasDuplicatePhoneTypes)
+
+            if isNewScan {
+                Button {
+                    onSave?()
+                } label: {
+                    HStack {
+                        Image(systemName: "square.and.arrow.down.fill")
+                        Text("Save Card")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .disabled(hasDuplicatePhoneTypes)
+            }
+
+            if !isNewScan {
+                Button {
+                    foundDuplicates = CardMerger.findDuplicates(of: card, in: modelContext)
+                    showDuplicateResult = true
+                } label: {
+                    HStack {
+                        Image(systemName: "doc.on.doc")
+                        Text("Check for Duplicates")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+
+                Button(role: .destructive) {
+                    showDeleteConfirm = true
+                } label: {
+                    HStack {
+                        Image(systemName: "trash")
+                        Text("Delete Card")
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
         }
     }
 
@@ -467,8 +559,8 @@ struct CardImagesSection: View {
     let onEditBack: () -> Void
 
     var body: some View {
-        let front = frontData.flatMap { UIImage(data: $0) }
-        let back = backData.flatMap { UIImage(data: $0) }
+        let front = CardImage.decode(frontData, maxPixel: 1200)
+        let back = CardImage.decode(backData, maxPixel: 1200)
 
         if front != nil || back != nil {
             Section {

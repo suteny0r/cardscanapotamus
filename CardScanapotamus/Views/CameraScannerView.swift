@@ -15,13 +15,18 @@ struct CameraScannerView: View {
     @State private var showCamera = false
     @State private var showPhotoPicker = false
     @State private var showFilePicker = false
+    @State private var pendingScan: ScannedCard?
+    @State private var duplicateCard: ScannedCard?
+    @State private var mergedIntoExisting = false
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 if let card = scannedCard {
                     CardDetailView(card: card, isNewScan: true) {
-                        modelContext.insert(card)
+                        if !mergedIntoExisting {
+                            modelContext.insert(card)
+                        }
                         try? modelContext.save()
                         dismiss()
                     }
@@ -71,7 +76,38 @@ struct CameraScannerView: View {
             } message: {
                 Text(errorMessage ?? "")
             }
+            .alert("Card Already Exists", isPresented: .init(
+                get: { duplicateCard != nil },
+                set: { if !$0 { duplicateCard = nil } }
+            )) {
+                Button("Merge") {
+                    if let existing = duplicateCard, let scan = pendingScan {
+                        CardMerger.merge(scan: scan, into: existing)
+                        mergedIntoExisting = true
+                        scannedCard = existing
+                    }
+                    pendingScan = nil
+                    duplicateCard = nil
+                }
+                Button("Keep as New") {
+                    scannedCard = pendingScan
+                    pendingScan = nil
+                    duplicateCard = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingScan = nil
+                    duplicateCard = nil
+                }
+            } message: {
+                Text("You already have a card for \(duplicateDescription). Merge this scan into it? Existing details are kept and blank fields are filled in.")
+            }
         }
+    }
+
+    private var duplicateDescription: String {
+        guard let d = duplicateCard else { return "this contact" }
+        let parts = [d.fullName, d.company].filter { !$0.isEmpty }
+        return parts.isEmpty ? (d.email.isEmpty ? "this contact" : d.email) : parts.joined(separator: " at ")
     }
 
     private var scanPromptView: some View {
@@ -150,9 +186,15 @@ struct CameraScannerView: View {
                     card = ContactParser.parse(lines: lines)
                 }
 
-                card.imageData = image.jpegData(compressionQuality: 0.7)
+                card.imageData = CardImage.storageData(from: image)
                 card.source = defaultSource.isEmpty ? nil : defaultSource
-                scannedCard = card
+
+                if let existing = CardMerger.findDuplicate(of: card, in: modelContext) {
+                    pendingScan = card
+                    duplicateCard = existing
+                } else {
+                    scannedCard = card
+                }
 
                 // Save debug data to iCloud if debug mode is on
                 if debugMode {
@@ -187,7 +229,7 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     private let photoOutput = AVCapturePhotoOutput()
     private var previewLayer: AVCaptureVideoPreviewLayer!
     private var captureDevice: AVCaptureDevice?
-    private var lastZoomFactor: CGFloat = 1.5
+    private var lastZoomFactor: CGFloat = 1.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -216,10 +258,9 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             captureSession.addOutput(photoOutput)
         }
 
-        // Set default 1.5x zoom
+        // Start at the camera's native 1x zoom
         try? device.lockForConfiguration()
-        let defaultZoom: CGFloat = 1.5
-        device.videoZoomFactor = min(defaultZoom, device.activeFormat.videoMaxZoomFactor)
+        device.videoZoomFactor = 1.0
         lastZoomFactor = device.videoZoomFactor
         device.unlockForConfiguration()
 

@@ -19,7 +19,7 @@ struct BackSideScanner {
             back = ContactParser.parse(lines: lines)
         }
 
-        card.backImageData = backImage.jpegData(compressionQuality: 0.7)
+        card.backImageData = CardImage.storageData(from: backImage)
         card.backRawText = back.rawText.isEmpty ? nil : back.rawText
         merge(back: back, into: card)
     }

@@ -16,6 +16,9 @@ struct CardScanapotamusApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    await CardImage.migrateStoredImagesIfNeeded(context: sharedModelContainer.mainContext)
+                }
         }
         .modelContainer(sharedModelContainer)
     }
