@@ -71,7 +71,7 @@ struct ExcelExporter {
                 addString(card.country ?? ""),
                 addString(card.source ?? ""),
                 addString(card.notes ?? ""),
-                addString(card.rawText),
+                addString(card.backRawText.map { card.rawText + "\n--- Back ---\n" + $0 } ?? card.rawText),
                 addString(dateFormatter.string(from: card.scannedAt))
             ])
         }

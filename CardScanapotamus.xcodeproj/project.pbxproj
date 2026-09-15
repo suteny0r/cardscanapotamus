@@ -12,6 +12,7 @@
 		3669D7AA491DB29BB5A21CFC /* ManageSourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56E5EE5E86AEB8A29D586B1B /* ManageSourcesView.swift */; };
 		46681379B0A853DFE7622CAA /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC368058F8AD14CA67A6D08 /* OCRService.swift */; };
 		4BA1C9489851F4992809C11A /* CardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D28AC8E8FC063A81264A8A1 /* CardListView.swift */; };
+		4C67E59951B36D41FC7BA465 /* BackSideScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E7E66756DEF03515F08126 /* BackSideScanner.swift */; };
 		55DCF9B606995EA92665C80E /* SourceOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7056E3B15F93DAC44ACA83E2 /* SourceOption.swift */; };
 		5690B8A0E173E97F84A41139 /* DebugExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 881C3A8DCCC1AC20634CAB55 /* DebugExporter.swift */; };
 		66AF4F44A61C09071AA2C562 /* CardScanapotamusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4534261C9E40D781CF91E37 /* CardScanapotamusApp.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		01E7E66756DEF03515F08126 /* BackSideScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackSideScanner.swift; sourceTree = "<group>"; };
 		054F8F088047360D30AD8960 /* ExcelExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExcelExporter.swift; sourceTree = "<group>"; };
 		0DC368058F8AD14CA67A6D08 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		12979248759C6568519353B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 		E12CAF71459B4BB1720A6912 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				01E7E66756DEF03515F08126 /* BackSideScanner.swift */,
 				6A6BC1FFFE37328370C9F46A /* ContactParser.swift */,
 				2A2170DC5142F7ED6CC3C2BF /* ContactsService.swift */,
 				881C3A8DCCC1AC20634CAB55 /* DebugExporter.swift */,
@@ -189,6 +192,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C67E59951B36D41FC7BA465 /* BackSideScanner.swift in Sources */,
 				287B961FC92BC76CDC12FC1D /* CameraScannerView.swift in Sources */,
 				A7D863035B5F387B544A2C9E /* CardDetailView.swift in Sources */,
 				4BA1C9489851F4992809C11A /* CardListView.swift in Sources */,
@@ -279,7 +283,7 @@
 				CODE_SIGN_ENTITLEMENTS = CardScanapotamus/CardScanapotamus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = NP58A25HR5;
 				INFOPLIST_FILE = CardScanapotamus/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -301,7 +305,7 @@
 				CODE_SIGN_ENTITLEMENTS = CardScanapotamus/CardScanapotamus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = NP58A25HR5;
 				INFOPLIST_FILE = CardScanapotamus/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
