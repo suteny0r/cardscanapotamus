@@ -24,6 +24,8 @@ struct CardDetailView: View {
     @State private var backError: String?
     @State private var hasOfferedBack = false
 
+    @State private var viewerItem: CardImageViewerItem?
+
     // Duplicate check for saved cards
     @State private var foundDuplicates: [ScannedCard] = []
     @State private var showDuplicateResult = false
@@ -240,6 +242,9 @@ struct CardDetailView: View {
         } message: {
             Text("Anything found on the back fills in details the front didn't have.")
         }
+        .fullScreenCover(item: $viewerItem) { item in
+            CardImageViewer(item: item)
+        }
         .fullScreenCover(isPresented: $showBackCamera) {
             CameraView { image in
                 if let image { processBackImage(image) }
@@ -299,10 +304,10 @@ struct CardDetailView: View {
         CardImagesSection(
             frontData: card.imageData,
             backData: card.backImageData,
-            isBusy: isProcessingBack
-        ) {
-            showBackPrompt = true
-        }
+            isBusy: isProcessingBack,
+            onEditBack: { showBackPrompt = true },
+            onOpen: { viewerItem = $0 }
+        )
     }
 
     private func processBackImage(_ image: UIImage) {
@@ -557,6 +562,7 @@ struct CardImagesSection: View {
     let backData: Data?
     let isBusy: Bool
     let onEditBack: () -> Void
+    let onOpen: (CardImageViewerItem) -> Void
 
     var body: some View {
         let front = CardImage.decode(frontData, maxPixel: 1200)
@@ -567,9 +573,11 @@ struct CardImagesSection: View {
                 VStack(spacing: 12) {
                     if let front {
                         CardImageThumb(image: front, label: back == nil ? nil : "Front")
+                            .onTapGesture { open(frontData) }
                     }
                     if let back {
                         CardImageThumb(image: back, label: "Back")
+                            .onTapGesture { open(backData) }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -580,8 +588,15 @@ struct CardImagesSection: View {
                         .frame(maxWidth: .infinity)
                 }
                 .disabled(isBusy)
+            } footer: {
+                Text("Tap an image to zoom in.")
             }
         }
+    }
+
+    private func open(_ data: Data?) {
+        guard let data else { return }
+        onOpen(CardImageViewerItem(data: data))
     }
 }
 
