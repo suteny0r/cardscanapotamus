@@ -56,6 +56,7 @@ struct CardMerger {
             existing.backRawText = scan.rawText.isEmpty ? nil : scan.rawText
         }
         if (existing.source ?? "").isEmpty { existing.source = scan.source }
+        if (existing.category ?? "").isEmpty { existing.category = scan.category }
         if (existing.notes ?? "").isEmpty { existing.notes = scan.notes }
         if existing.rawText.isEmpty { existing.rawText = scan.rawText }
     }

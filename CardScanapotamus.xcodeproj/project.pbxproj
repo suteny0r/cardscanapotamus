@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C9FACB518B7AC09FF2F99DC /* CategoryOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836B17E5A427B4FEFC6609B4 /* CategoryOption.swift */; };
 		287B961FC92BC76CDC12FC1D /* CameraScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A201D7F7FE8B84B4B14F86 /* CameraScannerView.swift */; };
 		3179571E39221C73CBEABA79 /* VCardParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A080EEE29BE1B595FE35DFC /* VCardParser.swift */; };
 		3669D7AA491DB29BB5A21CFC /* ManageSourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56E5EE5E86AEB8A29D586B1B /* ManageSourcesView.swift */; };
@@ -17,11 +18,13 @@
 		55DCF9B606995EA92665C80E /* SourceOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7056E3B15F93DAC44ACA83E2 /* SourceOption.swift */; };
 		5690B8A0E173E97F84A41139 /* DebugExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 881C3A8DCCC1AC20634CAB55 /* DebugExporter.swift */; };
 		59026BF391D5636A6F85A2DE /* CardImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80EA587BA9C6B1EEA2E3D6E /* CardImageViewer.swift */; };
+		6699C938F9ED05E0BF37BA0B /* ManageCategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752C0D88A22B28BB3BB1D9E3 /* ManageCategoriesView.swift */; };
 		66AF4F44A61C09071AA2C562 /* CardScanapotamusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4534261C9E40D781CF91E37 /* CardScanapotamusApp.swift */; };
 		786C9984CB74EC82D58D6C68 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4E7DBE280A8CD48174CDCE9 /* Assets.xcassets */; };
 		83573DAF92A37084AC6896E3 /* ScannedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC42B54CCE5F90E3A1E1B13 /* ScannedCard.swift */; };
 		95CB9F38B990C58875215ACA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76D4F6C1BDB2B76D1FD2080F /* ContentView.swift */; };
 		A7D863035B5F387B544A2C9E /* CardDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29094DA3D62C2CAE307C1A30 /* CardDetailView.swift */; };
+		B3DF116673C1CCF6A00FF5D6 /* OptionPickerBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C518560174A2B8AA61562117 /* OptionPickerBar.swift */; };
 		E4B2B531EB08914E47EBBC3E /* ContactParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A6BC1FFFE37328370C9F46A /* ContactParser.swift */; };
 		EF49555B473A1AE26A807D49 /* CardMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A893BC39956019C0A5E287 /* CardMerger.swift */; };
 		F8ACC7C321CA520BD4D54C47 /* ContactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2170DC5142F7ED6CC3C2BF /* ContactsService.swift */; };
@@ -40,12 +43,15 @@
 		5D28AC8E8FC063A81264A8A1 /* CardListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardListView.swift; sourceTree = "<group>"; };
 		6A6BC1FFFE37328370C9F46A /* ContactParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactParser.swift; sourceTree = "<group>"; };
 		7056E3B15F93DAC44ACA83E2 /* SourceOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceOption.swift; sourceTree = "<group>"; };
+		752C0D88A22B28BB3BB1D9E3 /* ManageCategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageCategoriesView.swift; sourceTree = "<group>"; };
 		76D4F6C1BDB2B76D1FD2080F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		79A201D7F7FE8B84B4B14F86 /* CameraScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraScannerView.swift; sourceTree = "<group>"; };
 		7DC42B54CCE5F90E3A1E1B13 /* ScannedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannedCard.swift; sourceTree = "<group>"; };
+		836B17E5A427B4FEFC6609B4 /* CategoryOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryOption.swift; sourceTree = "<group>"; };
 		881C3A8DCCC1AC20634CAB55 /* DebugExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugExporter.swift; sourceTree = "<group>"; };
 		973F39DF2C1A17F9F114FC10 /* CardScanapotamus.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CardScanapotamus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A080EEE29BE1B595FE35DFC /* VCardParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VCardParser.swift; sourceTree = "<group>"; };
+		C518560174A2B8AA61562117 /* OptionPickerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionPickerBar.swift; sourceTree = "<group>"; };
 		C80EA587BA9C6B1EEA2E3D6E /* CardImageViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardImageViewer.swift; sourceTree = "<group>"; };
 		E8863D072167C2F61C03C470 /* CardImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardImage.swift; sourceTree = "<group>"; };
 		F194050AEFC1BD8B85CDB189 /* CardScanapotamus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CardScanapotamus.entitlements; sourceTree = "<group>"; };
@@ -108,7 +114,9 @@
 				29094DA3D62C2CAE307C1A30 /* CardDetailView.swift */,
 				C80EA587BA9C6B1EEA2E3D6E /* CardImageViewer.swift */,
 				5D28AC8E8FC063A81264A8A1 /* CardListView.swift */,
+				752C0D88A22B28BB3BB1D9E3 /* ManageCategoriesView.swift */,
 				56E5EE5E86AEB8A29D586B1B /* ManageSourcesView.swift */,
+				C518560174A2B8AA61562117 /* OptionPickerBar.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -124,6 +132,7 @@
 		FC4259363347DDA191CAAFA7 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				836B17E5A427B4FEFC6609B4 /* CategoryOption.swift */,
 				7DC42B54CCE5F90E3A1E1B13 /* ScannedCard.swift */,
 				7056E3B15F93DAC44ACA83E2 /* SourceOption.swift */,
 			);
@@ -209,13 +218,16 @@
 				4BA1C9489851F4992809C11A /* CardListView.swift in Sources */,
 				EF49555B473A1AE26A807D49 /* CardMerger.swift in Sources */,
 				66AF4F44A61C09071AA2C562 /* CardScanapotamusApp.swift in Sources */,
+				0C9FACB518B7AC09FF2F99DC /* CategoryOption.swift in Sources */,
 				E4B2B531EB08914E47EBBC3E /* ContactParser.swift in Sources */,
 				F8ACC7C321CA520BD4D54C47 /* ContactsService.swift in Sources */,
 				95CB9F38B990C58875215ACA /* ContentView.swift in Sources */,
 				5690B8A0E173E97F84A41139 /* DebugExporter.swift in Sources */,
 				FBD85CF4F988F2B5F2A0B0BE /* ExcelExporter.swift in Sources */,
+				6699C938F9ED05E0BF37BA0B /* ManageCategoriesView.swift in Sources */,
 				3669D7AA491DB29BB5A21CFC /* ManageSourcesView.swift in Sources */,
 				46681379B0A853DFE7622CAA /* OCRService.swift in Sources */,
+				B3DF116673C1CCF6A00FF5D6 /* OptionPickerBar.swift in Sources */,
 				83573DAF92A37084AC6896E3 /* ScannedCard.swift in Sources */,
 				55DCF9B606995EA92665C80E /* SourceOption.swift in Sources */,
 				3179571E39221C73CBEABA79 /* VCardParser.swift in Sources */,

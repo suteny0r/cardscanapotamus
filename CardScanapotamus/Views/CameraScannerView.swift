@@ -4,6 +4,7 @@ import PhotosUI
 
 struct CameraScannerView: View {
     var defaultSource: String = ""
+    var defaultCategory: String = ""
     var debugMode: Bool = false
 
     @Environment(\.dismiss) private var dismiss
@@ -188,6 +189,7 @@ struct CameraScannerView: View {
 
                 card.imageData = CardImage.storageData(from: image)
                 card.source = defaultSource.isEmpty ? nil : defaultSource
+                card.category = defaultCategory.isEmpty ? nil : defaultCategory
 
                 if let existing = CardMerger.findDuplicate(of: card, in: modelContext) {
                     pendingScan = card

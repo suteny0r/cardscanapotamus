@@ -4,10 +4,11 @@ import SwiftData
 struct ContentView: View {
     @State private var activeSheet: ActiveSheet?
     @Query(sort: \SourceOption.createdAt) private var sourceOptions: [SourceOption]
+    @Query(sort: \CategoryOption.createdAt) private var categoryOptions: [CategoryOption]
+    @AppStorage("selectedCategory") private var selectedCategory: String = ""
     @Query(sort: \ScannedCard.scannedAt, order: .reverse) private var cards: [ScannedCard]
     @Environment(\.modelContext) private var modelContext
     @AppStorage("selectedSource") private var selectedSource: String = ""
-    @State private var showDeleteAllConfirm = false
     @State private var exportItem: ExportItem?
     @State private var exportError: String?
     @AppStorage("debugMode") private var debugMode: Bool = false
@@ -15,7 +16,12 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                sourcePickerBar
+                VStack(spacing: 0) {
+                    sourcePickerBar
+                    Divider().padding(.leading, 56)
+                    categoryPickerBar
+                }
+                .background(.bar)
                 CardListView()
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -44,11 +50,6 @@ struct ContentView: View {
                             } label: {
                                 Image(systemName: "square.and.arrow.up")
                             }
-                            Button(role: .destructive) {
-                                showDeleteAllConfirm = true
-                            } label: {
-                                Image(systemName: "trash")
-                            }
                         }
                         Button {
                             activeSheet = .scanner
@@ -62,20 +63,14 @@ struct ContentView: View {
             .sheet(item: $activeSheet) { sheet in
                 switch sheet {
                 case .scanner:
-                    CameraScannerView(defaultSource: selectedSource, debugMode: debugMode)
+                    CameraScannerView(defaultSource: selectedSource,
+                                      defaultCategory: selectedCategory,
+                                      debugMode: debugMode)
                 case .manageSources:
                     ManageSourcesView()
+                case .manageCategories:
+                    ManageCategoriesView()
                 }
-            }
-            .confirmationDialog("Delete All Cards", isPresented: $showDeleteAllConfirm, titleVisibility: .visible) {
-                Button("Delete All", role: .destructive) {
-                    for card in cards {
-                        modelContext.delete(card)
-                    }
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This will permanently delete all \(cards.count) scanned cards.")
             }
             .sheet(item: $exportItem) { item in
                 ShareSheet(items: [item.url])
@@ -94,6 +89,11 @@ struct ContentView: View {
                 selectedSource = ""
             }
         }
+        .onChange(of: categoryOptions) {
+            if !selectedCategory.isEmpty && !categoryOptions.contains(where: { $0.name == selectedCategory }) {
+                selectedCategory = ""
+            }
+        }
     }
 
     private func exportToExcel() {
@@ -106,48 +106,34 @@ struct ContentView: View {
     }
 
     private var sourcePickerBar: some View {
-        HStack {
-            Image(systemName: "tag.fill")
-                .foregroundStyle(.blue)
-                .frame(width: 24)
-
-            Text("Source:")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-
-            if sourceOptions.isEmpty {
-                Text("None defined")
-                    .foregroundStyle(.tertiary)
-                    .font(.subheadline)
-            } else {
-                Picker("Source", selection: $selectedSource) {
-                    Text("None").tag("")
-                    ForEach(sourceOptions) { option in
-                        Text(option.name).tag(option.name)
-                    }
-                }
-                .labelsHidden()
-                .fixedSize()
-            }
-
-            Spacer()
-
-            Button {
-                activeSheet = .manageSources
-            } label: {
-                Image(systemName: "pencil.circle.fill")
-                    .font(.title3)
-            }
+        OptionPickerBar(
+            title: "Source",
+            icon: "tag.fill",
+            tint: .blue,
+            options: sourceOptions.map(\.name),
+            selection: $selectedSource
+        ) {
+            activeSheet = .manageSources
         }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
-        .background(.bar)
+    }
+
+    private var categoryPickerBar: some View {
+        OptionPickerBar(
+            title: "Category",
+            icon: "briefcase.fill",
+            tint: .green,
+            options: categoryOptions.map(\.name),
+            selection: $selectedCategory
+        ) {
+            activeSheet = .manageCategories
+        }
     }
 }
 
 enum ActiveSheet: Identifiable {
     case scanner
     case manageSources
+    case manageCategories
 
     var id: Self { self }
 }

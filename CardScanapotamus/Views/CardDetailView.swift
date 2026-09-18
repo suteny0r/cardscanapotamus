@@ -9,6 +9,9 @@ struct CardDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \SourceOption.createdAt) private var sourceOptions: [SourceOption]
+    @Query(sort: \CategoryOption.createdAt) private var categoryOptions: [CategoryOption]
+    @State private var showAddCategory = false
+    @State private var newCategoryName = ""
     @State private var contactsSaved = false
     @State private var showContactSave = false
     @State private var showDeleteConfirm = false
@@ -96,38 +99,24 @@ struct CardDetailView: View {
                 }
             }
 
-            Section("Source & Notes") {
-                HStack {
-                    Image(systemName: "tag.fill")
-                        .foregroundStyle(.blue)
-                        .frame(width: 24)
-                    if sourceOptions.isEmpty {
-                        TextField("Source", text: Binding(
-                            get: { card.source ?? "" },
-                            set: { card.source = $0.isEmpty ? nil : $0 }
-                        ))
-                    } else {
-                        Picker("Source", selection: Binding(
-                            get: { card.source ?? "" },
-                            set: { card.source = $0.isEmpty ? nil : $0 }
-                        )) {
-                            Text("None").tag("")
-                            ForEach(sourceOptions) { option in
-                                Text(option.name).tag(option.name)
-                            }
-                        }
-                        .labelsHidden()
-                        .fixedSize()
-                    }
-                    Spacer()
-                    Button {
-                        newSourceName = ""
-                        showAddSource = true
-                    } label: {
-                        Image(systemName: "pencil.circle.fill")
-                            .font(.title3)
-                    }
-                    .buttonStyle(.borderless)
+            Section("Source, Category & Notes") {
+                OptionPickerRow(
+                    title: "Source",
+                    icon: "tag.fill",
+                    options: sourceOptions.map(\.name),
+                    value: $card.source
+                ) {
+                    newSourceName = ""
+                    showAddSource = true
+                }
+                OptionPickerRow(
+                    title: "Category",
+                    icon: "briefcase.fill",
+                    options: categoryOptions.map(\.name),
+                    value: $card.category
+                ) {
+                    newCategoryName = ""
+                    showAddCategory = true
                 }
                 HStack(alignment: .top) {
                     Image(systemName: "note.text")
@@ -185,6 +174,18 @@ struct CardDetailView: View {
             Button("Fix Now", role: .cancel) {}
         } message: {
             Text("Phone type selections have duplicates. Going back will discard your unsaved type changes. Stay to fix them.")
+        }
+        .alert("Add Category", isPresented: $showAddCategory) {
+            TextField("Category name", text: $newCategoryName)
+            Button("Add") {
+                let name = newCategoryName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                if !categoryOptions.contains(where: { $0.name == name }) {
+                    modelContext.insert(CategoryOption(name: name))
+                }
+                card.category = name
+            }
+            Button("Cancel", role: .cancel) {}
         }
         .alert("Add Source", isPresented: $showAddSource) {
             TextField("Source name", text: $newSourceName)

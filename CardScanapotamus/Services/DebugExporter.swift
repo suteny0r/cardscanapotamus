@@ -49,6 +49,7 @@ struct DebugExporter {
             results += "Zip: \(card.zip ?? "")\n"
             results += "Country: \(card.country ?? "")\n"
             results += "Source: \(card.source ?? "")\n"
+            results += "Category: \(card.category ?? "")\n"
             results += "Notes: \(card.notes ?? "")\n"
             results += "\n--- Raw Text ---\n"
             results += card.rawText

@@ -4,6 +4,17 @@ import SwiftData
 struct CardListView: View {
     @Query(sort: \ScannedCard.scannedAt, order: .reverse) private var cards: [ScannedCard]
     @Environment(\.modelContext) private var modelContext
+    @State private var searchText = ""
+
+    private var filteredCards: [ScannedCard] {
+        let query = searchText.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return cards }
+        let terms = query.split(separator: " ").map(String.init)
+        return cards.filter { card in
+            let haystack = searchableText(for: card)
+            return terms.allSatisfy { haystack.localizedCaseInsensitiveContains($0) }
+        }
+    }
 
     var body: some View {
         Group {
@@ -15,7 +26,7 @@ struct CardListView: View {
                 }
             } else {
                 List {
-                    ForEach(cards) { card in
+                    ForEach(filteredCards) { card in
                         NavigationLink {
                             CardDetailView(card: card)
                         } label: {
@@ -24,8 +35,31 @@ struct CardListView: View {
                     }
                     .onDelete(perform: deleteCards)
                 }
+                .overlay {
+                    if filteredCards.isEmpty {
+                        ContentUnavailableView.search(text: searchText)
+                    }
+                }
+                .searchable(text: $searchText, prompt: "Search cards")
+                .autocorrectionDisabled()
             }
         }
+    }
+
+    /// Every field a user might reasonably search on, joined for matching.
+    private func searchableText(for card: ScannedCard) -> String {
+        var parts: [String] = [
+            card.fullName, card.jobTitle, card.company, card.email,
+            card.phone, card.website, card.address, card.rawText
+        ]
+        let optionals: [String?] = [
+            card.phone2, card.phone3,
+            card.addressLine1, card.addressLine2,
+            card.city, card.state, card.zip, card.country,
+            card.source, card.category, card.notes, card.backRawText
+        ]
+        parts.append(contentsOf: optionals.compactMap { $0 })
+        return parts.joined(separator: "\n")
     }
 
     private func cardRow(_ card: ScannedCard) -> some View {
@@ -60,14 +94,13 @@ struct CardListView: View {
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
-                if let source = card.source, !source.isEmpty {
-                    Text(source)
-                        .font(.caption2)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(.blue.opacity(0.7))
-                        .clipShape(Capsule())
+                HStack(spacing: 6) {
+                    if let source = card.source, !source.isEmpty {
+                        TagBadge(text: source, tint: .blue)
+                    }
+                    if let category = card.category, !category.isEmpty {
+                        TagBadge(text: category, tint: .green)
+                    }
                 }
             }
         }
@@ -75,8 +108,9 @@ struct CardListView: View {
     }
 
     private func deleteCards(at offsets: IndexSet) {
+        let visible = filteredCards
         for index in offsets {
-            modelContext.delete(cards[index])
+            modelContext.delete(visible[index])
         }
     }
 }
@@ -94,4 +128,19 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+struct TagBadge: View {
+    let text: String
+    let tint: Color
+
+    var body: some View {
+        Text(text)
+            .font(.caption2)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(tint.opacity(0.7))
+            .clipShape(Capsule())
+    }
 }
