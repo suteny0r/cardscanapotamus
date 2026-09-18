@@ -307,7 +307,7 @@
 				CODE_SIGN_ENTITLEMENTS = CardScanapotamus/CardScanapotamus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = NP58A25HR5;
 				INFOPLIST_FILE = CardScanapotamus/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -329,7 +329,7 @@
 				CODE_SIGN_ENTITLEMENTS = CardScanapotamus/CardScanapotamus.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = NP58A25HR5;
 				INFOPLIST_FILE = CardScanapotamus/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
