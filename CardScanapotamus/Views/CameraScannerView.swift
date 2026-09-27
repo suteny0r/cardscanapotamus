@@ -232,6 +232,10 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     private var previewLayer: AVCaptureVideoPreviewLayer!
     private var captureDevice: AVCaptureDevice?
     private var lastZoomFactor: CGFloat = 1.0
+    /// Zoom factor that corresponds to the familiar "1x" view. On a multi-camera
+    /// virtual device this is the wide lens's switch-over point (usually 2.0);
+    /// on a single wide-angle camera it is 1.0.
+    private var baseZoomFactor: CGFloat = 1.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -248,7 +252,16 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     private func setupCamera() {
         captureSession.sessionPreset = .photo
 
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+        // Prefer the system's multi-camera virtual device. Like the built-in
+        // Camera app, it switches to the ultra-wide lens automatically when the
+        // subject is closer than the main lens can focus (Pro models from the
+        // 13 Pro onward), so cards held close stay sharp.
+        let discovery = AVCaptureDevice.DiscoverySession(
+            deviceTypes: [.builtInTripleCamera, .builtInDualWideCamera, .builtInWideAngleCamera],
+            mediaType: .video,
+            position: .back
+        )
+        guard let device = discovery.devices.first,
               let input = try? AVCaptureDeviceInput(device: device) else { return }
 
         captureDevice = device
@@ -260,10 +273,18 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             captureSession.addOutput(photoOutput)
         }
 
-        // Start at the camera's native 1x zoom
+        // Start at the familiar 1x view and bias autofocus toward near subjects.
         try? device.lockForConfiguration()
-        device.videoZoomFactor = 1.0
+        baseZoomFactor = device.virtualDeviceSwitchOverVideoZoomFactors.first
+            .map { CGFloat(truncating: $0) } ?? 1.0
+        device.videoZoomFactor = min(baseZoomFactor, device.activeFormat.videoMaxZoomFactor)
         lastZoomFactor = device.videoZoomFactor
+        if device.isFocusModeSupported(.continuousAutoFocus) {
+            device.focusMode = .continuousAutoFocus
+        }
+        if device.isAutoFocusRangeRestrictionSupported {
+            device.autoFocusRangeRestriction = .near
+        }
         device.unlockForConfiguration()
 
         // Preview layer
@@ -318,7 +339,8 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         case .began:
             lastZoomFactor = device.videoZoomFactor
         case .changed:
-            let newZoom = max(1.0, min(lastZoomFactor * gesture.scale, device.activeFormat.videoMaxZoomFactor))
+            let maxZoom = min(device.activeFormat.videoMaxZoomFactor, baseZoomFactor * 8)
+            let newZoom = max(baseZoomFactor, min(lastZoomFactor * gesture.scale, maxZoom))
             try? device.lockForConfiguration()
             device.videoZoomFactor = newZoom
             device.unlockForConfiguration()

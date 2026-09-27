@@ -15,7 +15,7 @@ struct ExcelExporter {
         try? FileManager.default.removeItem(at: xlsxURL)
 
         // Build shared strings
-        let headers = ["Name", "Title", "Company", "Email", "Phone", "Cell", "Fax", "Website", "Address Line 1", "Address Line 2", "City", "State", "Zip", "Country", "Source", "Category", "Notes", "Raw Text", "Date Scanned"]
+        let headers = ["Date Scanned", "Name", "Title", "Company", "Email", "Phone", "Cell", "Fax", "Website", "Address Line 1", "Address Line 2", "City", "State", "Zip", "Country", "Source", "Category", "Notes", "Raw Text"]
         var sharedStrings: [String] = []
         var stringIndex: [String: Int] = [:]
 
@@ -55,6 +55,7 @@ struct ExcelExporter {
             }
 
             rows.append([
+                addString(dateFormatter.string(from: card.scannedAt)),
                 addString(card.fullName),
                 addString(card.jobTitle),
                 addString(card.company),
@@ -72,8 +73,7 @@ struct ExcelExporter {
                 addString(card.source ?? ""),
                 addString(card.category ?? ""),
                 addString(card.notes ?? ""),
-                addString(card.backRawText.map { card.rawText + "\n--- Back ---\n" + $0 } ?? card.rawText),
-                addString(dateFormatter.string(from: card.scannedAt))
+                addString(card.backRawText.map { card.rawText + "\n--- Back ---\n" + $0 } ?? card.rawText)
             ])
         }
 
@@ -98,7 +98,7 @@ struct ExcelExporter {
         // Sheet XML
         let colLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S"]
         var sheetXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\"><cols>"
-        let widths = [20, 25, 25, 30, 18, 18, 18, 25, 30, 20, 18, 10, 12, 18, 20, 20, 30, 40, 20]
+        let widths = [20, 20, 25, 25, 30, 18, 18, 18, 25, 30, 20, 18, 10, 12, 18, 20, 20, 30, 40]
         for (i, w) in widths.enumerated() {
             sheetXML += "<col min=\"\(i+1)\" max=\"\(i+1)\" width=\"\(w)\" customWidth=\"1\"/>"
         }
